@@ -1,25 +1,22 @@
-"use client";
-import Link from "next/link";
-import { Col, Container, Row } from "react-bootstrap";
 import WebLink from "./WebLink";
 
 const Footer = () => (
   <div className="bg-primary text-light">
-    <Container className="py-3">
-      <Row>
-        <Col>
-          Department of Computer Scirnce & IT <br />
+    <div className="container py-3">
+      <div className="row">
+        <div className="col">
+          Department of Computer Science & IT <br />
           University of Jammu
-        </Col>
-        <Col className="right">
+        </div>
+        <div className="col">
           Tawi, Jammu, Jammu and Kashmir <br />
           <WebLink href="tel:+911912222222">+91 191 222 22 22</WebLink> <br />
           <WebLink href="mailto:cscit@jammuuniversity.com">
             cscit@jammuuniversity.com
           </WebLink>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   </div>
 );
 

@@ -1,23 +1,71 @@
-"use client";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
+import { useContext } from "react";
+import Link from "next/link";
 
-const Header = () => (
-  <Navbar bg="primary" data-bs-theme="dark" expand="lg">
-    <Container>
-      <Navbar.Brand href="/">Department of Computer Science & IT</Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="ms-auto">
-          <Nav.Link href="/">Home</Nav.Link>
-          <Nav.Link href="/news">News</Nav.Link>
-          <Nav.Link href="/login">Login</Nav.Link>
-          <Nav.Link href="/about">About</Nav.Link>
-        </Nav>
-      </Navbar.Collapse>
-    </Container>
-  </Navbar>
-);
+import AuthContext from "../context/auth";
+
+const Header = () => {
+  const { user } = useContext(AuthContext);
+
+  return (
+    <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+      <div className="container">
+        <a className="navbar-brand" href="/">
+          Department of Computer Science & IT <br />
+          Univesrsity of Jammu
+        </a>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <Link className="nav-link active" href="/news">
+                News
+              </Link>
+            </li>
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link active" href="/classes">
+                    Classes
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link active" href="/profile">
+                    Profile
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link active" href="/Logout">
+                    Logout
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <Link className="nav-link active" href="/login">
+                  Examination Login
+                </Link>
+              </li>
+            )}
+            <li className="nav-item">
+              <Link className="nav-link active" href="/about">
+                About
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
 export default Header;

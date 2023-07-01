@@ -1,9 +1,8 @@
-"use client";
-import { Container } from "react-bootstrap";
+import Carousel from "./components/carousel";
 
 const Page = () => (
   <>
-    <Container>hi</Container>
+    <Carousel />
   </>
 );
 
