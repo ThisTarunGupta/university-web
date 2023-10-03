@@ -81,6 +81,7 @@ const DashboardComponent = ({
     let res;
     if (add) {
       delete formData.id;
+      if (obj === "students") formData.batch = batchID;
       res = await fetch(`${api}?uid=${user.id}`, {
         method: "POST",
         headers: {
@@ -316,9 +317,12 @@ const DashboardComponent = ({
                     </label>
                     <input
                       className="form-control"
+                      type={key === "email" ? "email" : "text"}
                       id={key}
                       name={key}
                       value={formData[key]}
+                      minLength={key === "phone" && 10}
+                      maxLength={key === "phone" && 10}
                       onChange={({ target: { value } }) =>
                         setFormData({ [key]: value })
                       }
