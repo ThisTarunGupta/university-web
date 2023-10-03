@@ -1,38 +1,50 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useReducer, useState } from "react";
 import { redirect } from "next/navigation";
 
 import AuthContext from "../context/auth";
-import Sidebar from "../components/sidebar";
-import ClassContext from "./context";
+import StateContext from "../context/state";
 
 const ClassesLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const [classes, setClasses] = useState(null);
+  const [state, setState] = useReducer(
+    (current, update) => ({
+      ...current,
+      ...update,
+    }),
+    {
+      batches: null,
+      courses: null,
+      exams: null,
+      students: null,
+      subjects: null,
+    }
+  );
 
   useEffect(() => {
-    if (user) {
-      const initClasses = async () => {
-        const res = await fetch("/api/classes", {
-          method: "POST",
-          cache: "force-cache",
-          headers: {
-            "Content-Type": "appliaction/json",
-          },
-          body: JSON.stringify({ classes: user.classes }),
+    if (
+      user &&
+      !(
+        state["batches"] &&
+        state["courses"] &&
+        state["exams"] &&
+        state["subjects"]
+      )
+    ) {
+      const initState = () => {
+        ["batches", "courses", "exams", "subjects"].forEach(async (x) => {
+          const res = await fetch(`/api/${x}?uid=${user.id}`);
+          setState({ [x]: (await res.json()).data });
         });
-
-        const { error, data } = await res.json();
-        if (error) redirect("/");
-
-        setClasses(data);
       };
-      initClasses();
-    } else redirect("/");
+      initState();
+    }
   }, [user]);
 
   return (
-    <ClassContext.Provider value={classes}>{children}</ClassContext.Provider>
+    <StateContext.Provider value={{ state, setState }}>
+      {children}
+    </StateContext.Provider>
   );
 };
 

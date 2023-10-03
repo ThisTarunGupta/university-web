@@ -1,14 +1,14 @@
 "use client";
 import { useContext } from "react";
 
-import ClassContext from "./context";
+import AuthContext from "../context/auth";
 import { redirect } from "next/navigation";
 
-const ClassPage = () => {
-  const classes = useContext(ClassContext);
+const ClassesPage = () => {
+  const { user } = useContext(AuthContext);
 
-  return classes ? (
-    redirect(`/classes/${classes[0].batch.id}/${classes[0].subject.id}`)
+  return user && user.classes && user.classes.length ? (
+    redirect(`/classes/${user.classes[0].batch}-${user.classes[0].subject}`)
   ) : (
     <div className="container">
       <h1 className="text-center">No classes alloted yet:(</h1>
@@ -16,4 +16,4 @@ const ClassPage = () => {
   );
 };
 
-export default ClassPage;
+export default ClassesPage;

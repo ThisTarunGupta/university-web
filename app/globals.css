@@ -1,0 +1,11 @@
+.switch {
+  display: flex;
+  height: 20px;
+  margin-left: 50px;
+  width: 50px;
+}
+
+.switch span {
+  border-radius: 0;
+  flex: 1;
+}

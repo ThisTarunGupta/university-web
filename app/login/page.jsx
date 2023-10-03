@@ -27,7 +27,6 @@ const LoginPage = () => {
     setError(null);
     localStorage.setItem("user", JSON.stringify(data));
     setUser(data);
-    redirect("/");
   };
 
   return user ? (
@@ -62,17 +61,6 @@ const LoginPage = () => {
           id="password"
           name="password"
           required
-        />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="rememberMe" className="form-check-label ">
-          Remember me
-        </label>
-        <input
-          type="checkbox"
-          className="form-check-input mx-2"
-          id="rememberMe"
-          name="rememberMe"
         />
       </div>
       <button type="submit" className="btn btn-primary">

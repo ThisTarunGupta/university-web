@@ -1,9 +1,17 @@
-import Carousel from "./components/carousel";
+"use client";
+import { useContext } from "react";
+import { redirect } from "next/navigation";
 
-const Page = () => (
-  <>
-    <Carousel />
-  </>
-);
+import AuthContext from "./context/auth";
 
-export default Page;
+const RootPage = () => {
+  const { user } = useContext(AuthContext);
+
+  return user
+    ? user.admin
+      ? redirect("/dashboard")
+      : redirect("/classes")
+    : redirect("/login");
+};
+
+export default RootPage;

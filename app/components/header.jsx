@@ -4,12 +4,15 @@ import Link from "next/link";
 import AuthContext from "../context/auth";
 
 const Header = () => {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   return (
     <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
       <div className="container">
-        <a className="navbar-brand" href="/">
+        <a
+          className="navbar-brand"
+          href={user ? (user.admin ? "/dashboard" : "/classes") : "/login"}
+        >
           Department of Computer Science & IT <br />
           Univesrsity of Jammu
         </a>
@@ -26,41 +29,20 @@ const Header = () => {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <Link className="nav-link active" href="/news">
-                News
-              </Link>
-            </li>
-            {user ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link active" href="/classes">
-                    Classes
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link active" href="/profile">
-                    Profile
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link active" href="/Logout">
-                    Logout
-                  </Link>
-                </li>
-              </>
-            ) : (
+            {user && (
               <li className="nav-item">
-                <Link className="nav-link active" href="/login">
-                  Examination Login
+                <Link
+                  className="nav-link active"
+                  href="/"
+                  onClick={() => {
+                    localStorage.clear();
+                    setUser(null);
+                  }}
+                >
+                  Logout
                 </Link>
               </li>
             )}
-            <li className="nav-item">
-              <Link className="nav-link active" href="/about">
-                About
-              </Link>
-            </li>
           </ul>
         </div>
       </div>
