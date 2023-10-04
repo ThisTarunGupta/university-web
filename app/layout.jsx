@@ -1,6 +1,5 @@
 "use client";
 import { config } from "dotenv";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Poppins } from "next/font/google";
 
@@ -20,9 +19,13 @@ const RootLayout = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    user === null ? setUser(null) : setUser(user);
+    restoreUser();
   }, []);
+
+  const restoreUser = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    user ? setUser(user) : setUser(null);
+  };
 
   return (
     <html lang="en">
@@ -34,6 +37,7 @@ const RootLayout = ({ children }) => {
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <title>Department of Computer Science</title>
       </head>
       <body className={`${poppins.className} bg-light`}>
         <AuthContext.Provider value={{ user, setUser }}>

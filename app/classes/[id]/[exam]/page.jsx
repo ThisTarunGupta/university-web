@@ -75,6 +75,7 @@ const ExamPage = ({ params: { id, exam } }) => {
       let formData = {};
       data.forEach((student) => {
         if (
+          student["marks"] &&
           student["marks"][slug[1]] &&
           student["marks"][slug[1]][exam] === null
         )
@@ -172,7 +173,9 @@ const ExamPage = ({ params: { id, exam } }) => {
           {data ? (
             data.map((student, indx) => {
               const marks =
-                student["marks"][slug[1]] && student["marks"][slug[1]][exam];
+                student["marks"] &&
+                student["marks"][slug[1]] &&
+                student["marks"][slug[1]][exam];
               return (
                 <tr key={student.id}>
                   <th scope="row">{indx + 1}</th>
