@@ -25,6 +25,13 @@ const RootLayout = ({ children }) => {
   const restoreUser = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     user ? setUser(user) : setUser(null);
+
+    //onAuthStateChanged(auth, async (user) => {
+    //   if (user) {
+    //    const userData = await getDoc(doc(db, "users", user.uid));
+    //   if (userData.exists()) setUser({ id: user.uid, ...userData });
+    //   } else console.error("No user found");
+    //  });
   };
 
   return (

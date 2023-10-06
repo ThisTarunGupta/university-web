@@ -35,8 +35,7 @@ const ResultPage = ({ params: { id } }) => {
   useEffect(() => {
     const batches = state["batches"];
     const courses = state["courses"];
-    const exams = state["exams"];
-    if (batches && courses && exams && id) {
+    if (batches && courses && id) {
       const batch = batches.find((batch) => batch.id === id);
       const sems = [];
       for (
@@ -47,7 +46,6 @@ const ResultPage = ({ params: { id } }) => {
         sems.push(i);
 
       setFormData({
-        exams,
         sems,
       });
     }
@@ -88,6 +86,26 @@ const ResultPage = ({ params: { id } }) => {
       }
     }
   }, [id, formData.sem, state]);
+
+  useEffect(() => {
+    const exams = state["exams"];
+    const subjects = state["subjects"];
+    if (formData.sem && formData.subject && exams && subjects) {
+      if (formData.subject === "all")
+        setFormData({
+          exams: [...Object.keys(exams.core), ...Object.keys(exams.practical)],
+        });
+      else {
+        const slug = subjects.find(
+          (subject) => subject.id === formData.subject
+        ).slug;
+        if (slug)
+          ["practical", "project"].includes(slug)
+            ? setFormData({ exams: Object.keys(exams.practical) })
+            : setFormData({ exams: Object.keys(exams.core) });
+      }
+    }
+  }, [formData.sem, formData.subject, state]);
 
   const handleDownload = () => {};
 
@@ -163,18 +181,23 @@ const ResultPage = ({ params: { id } }) => {
             if (studentSubjectMarks) {
               marks[subject] = 0;
               Object.keys(studentSubjectMarks).forEach((exam) => {
-                if (["minor1", "minor2", "reminor"].includes(exam))
+                if (["internal", "external"].includes(exam))
+                  marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                else if (["minor1", "minor2", "reminor"].includes(exam))
                   subjectMarks.push(parseInt(studentSubjectMarks[exam]) || 0);
                 else marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
               });
 
-              subjectMarks.sort((a, b) => {
-                if (a === null) return 1;
-                else if (a > b) return -1;
-                else if (a < b) return 1;
-              });
+              if (subjectMarks.length) {
+                subjectMarks.sort((a, b) => {
+                  if (a === null) return 1;
+                  else if (a > b) return -1;
+                  else if (a < b) return 1;
+                });
 
-              marks[subject] += (subjectMarks[0] || 0) + (subjectMarks[1] || 0);
+                marks[subject] +=
+                  (subjectMarks[0] || 0) + (subjectMarks[1] || 0);
+              }
             }
           };
 
@@ -184,18 +207,23 @@ const ResultPage = ({ params: { id } }) => {
               let subjectMarks = [];
               marks[subject] = 0;
               Object.keys(studentSubjectMarks).forEach((exam) => {
-                if (["minor1", "minor2", "reminor"].includes(exam))
+                if (["internal", "external"].includes(exam))
+                  marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                else if (["minor1", "minor2", "reminor"].includes(exam))
                   subjectMarks.push(parseInt(studentSubjectMarks[exam]) || 0);
                 else marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
               });
 
-              subjectMarks.sort((a, b) => {
-                if (a === null) return 1;
-                else if (a > b) return -1;
-                else if (a < b) return 1;
-              });
+              if (subjectMarks.length) {
+                subjectMarks.sort((a, b) => {
+                  if (a === null) return 1;
+                  else if (a > b) return -1;
+                  else if (a < b) return 1;
+                });
 
-              marks[subject] += (subjectMarks[0] || 0) + (subjectMarks[1] || 0);
+                marks[subject] +=
+                  (subjectMarks[0] || 0) + (subjectMarks[1] || 0);
+              }
             } else marks[formData.subject] = "NA";
           };
 
@@ -393,15 +421,12 @@ const ResultPage = ({ params: { id } }) => {
                   <option value={0} disabled>
                     Select exam
                   </option>
+                  <option value={"all"}>All exams</option>
                   {formData.exams && (
                     <>
-                      <option value={"all"}>All exams</option>
                       {formData.exams.map((exam, indx) => (
-                        <option
-                          key={indx}
-                          value={exam.name.replace(" ", "").toLowerCase()}
-                        >
-                          {exam.name}
+                        <option key={indx} value={exam}>
+                          {exam.toUpperCase()}
                         </option>
                       ))}
                     </>

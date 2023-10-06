@@ -59,7 +59,6 @@ export async function PUT(req) {
         name: name.trim(),
         subjectId: subjectId.trim(),
         slug: slug.trim(),
-        credits,
       });
 
       return NextResponse.json({ error: null, data: null });

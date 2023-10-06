@@ -1,24 +1,20 @@
+import { collection, getDocs } from "firebase/firestore/lite";
 import { NextResponse } from "next/server";
 
+import { db } from "@/app/firebaseConfig";
+
 export async function GET(req) {
-  const data = [
-    {
-      name: "minor1",
-      marks: 20,
-    },
-    {
-      name: "minor2",
-      marks: 20,
-    },
-    {
-      name: "reminor",
-      marks: 20,
-    },
-    {
-      name: "major",
-      marks: 60,
-    },
-  ];
+  const data = {};
+  const querySnapshot = await getDocs(collection(db, "exams"));
+  if (!querySnapshot)
+    return NextResponse.json({
+      error: "Error in reading exams",
+      data: null,
+    });
+
+  if (querySnapshot.empty)
+    return NextResponse.json({ error: "No exams found", data: null });
+  querySnapshot.forEach((doc) => (data[doc.id] = doc.data()));
 
   return NextResponse.json({ error: null, data });
 }

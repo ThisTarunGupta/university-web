@@ -27,7 +27,6 @@ const StudentsPage = ({ params: { id } }) => (
       batchID={id}
       name="Student"
       obj="students"
-      sort="rollno"
     />
   </>
 );

@@ -37,16 +37,21 @@ export async function GET(req) {
 
     querySnapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
 
-    return NextResponse.json({ error: null, data });
-  } else if (await isAdmin(uid)) {
-    const querySnapshot = await getDocs(collection(db, collectionName));
-    if (!querySnapshot)
-      return NextResponse.json({
-        error: "Error in reading students",
-        data: null,
-      });
+    let batchLength;
+    const rollno = data[0].rollno;
+    for (let i = 0; i < rollno.length; i++)
+      if (isNaN(rollno[i])) {
+        batchLength = rollno.length - i;
+        break;
+      }
+    data.sort((a, b) => {
+      const _a = a.rollno.substring(0, a.rollno.length - batchLength);
+      const _b = b.rollno.substring(0, a.rollno.length - batchLength);
+      if (_a < _b) return -1;
+      else if (_a > _b) return 1;
 
-    querySnapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+      return 0;
+    });
 
     return NextResponse.json({ error: null, data });
   } else
@@ -58,8 +63,9 @@ export async function GET(req) {
 
 export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    const { batch, rollno, name, parentage, email, phone } = await req.json();
-    if ((batch, rollno && name && parentage && email && phone)) {
+    const { batch, rollno, name, parentage, email, phone, reappear } =
+      await req.json();
+    if (batch && rollno && name && parentage && email && phone) {
       const docRef = await addDoc(collection(db, collectionName), {
         batch: batch.trim(),
         rollno: rollno.trim(),
@@ -82,9 +88,14 @@ export async function POST(req) {
 }
 
 export async function PUT(req) {
-  const { data, exam, merge, ref } = await req.json();
+  const { id, data, exam, merge, reappear, ref } = await req.json();
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    if (ref === "details") {
+    if (id && reappear) {
+      console.log(id, reappear);
+      updateDoc(doc(db, collectionName, id), {
+        reappear,
+      });
+    } else if (ref === "details") {
       const { id, rollno, name, parantage, email, phone } = data;
       if (id && rollno && name && parantage && email && phone) {
         updateDoc(doc(db, collectionName, id), {

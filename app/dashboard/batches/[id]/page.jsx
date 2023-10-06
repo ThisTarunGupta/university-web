@@ -42,9 +42,15 @@ const BatchPage = ({ params: { id } }) => {
             </button>
           </Link>
           <Link href={`${id}/students`}>
-            <button className="btn btn-outline-success">
+            <button className="btn btn-outline-success me-3">
               <i className="fa-solid fa-children me-2"></i>
               Manage students
+            </button>
+          </Link>
+          <Link href={`${id}/reappear`}>
+            <button className="btn btn-outline-warning">
+              <i className="fa-solid fa-children me-2"></i>
+              Reappear students
             </button>
           </Link>
         </div>

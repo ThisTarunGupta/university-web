@@ -16,7 +16,6 @@ const ClassesLayout = ({ children }) => {
       batches: null,
       courses: null,
       exams: null,
-      students: null,
       subjects: null,
     }
   );
@@ -32,7 +31,7 @@ const ClassesLayout = ({ children }) => {
       )
     ) {
       const initState = () => {
-        ["batches", "courses", "exams", "subjects"].forEach(async (x) => {
+        Object.keys(state).forEach(async (x) => {
           const res = await fetch(`/api/${x}?uid=${user.id}`);
           setState({ [x]: (await res.json()).data });
         });

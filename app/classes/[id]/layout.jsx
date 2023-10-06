@@ -27,7 +27,6 @@ const ClassLayout = ({ children }) => {
       });
 
       menu && menu.length && setMenu(menu);
-      //      setMenu([...menu, { id: "../requests", name: "Requests" }]);
     }
   }, [state, user]);
 

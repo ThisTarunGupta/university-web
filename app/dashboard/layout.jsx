@@ -22,10 +22,6 @@ const menu = [
     id: "teachers",
     name: "Teachers",
   },
-  {
-    id: "requests",
-    name: "Requests",
-  },
 ];
 
 const DashboardLayout = ({ children }) => {

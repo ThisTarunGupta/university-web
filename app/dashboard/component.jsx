@@ -15,7 +15,6 @@ const DashboardComponent = ({
   format,
   name,
   obj,
-  sort,
   stateFormat,
 }) => {
   const { user } = useContext(AuthContext);
@@ -31,20 +30,6 @@ const DashboardComponent = ({
   );
   const [importedData, setImportedData] = useState();
   const [message, setMessage] = useState({ data: "", varient: "" });
-
-  useEffect(() => {
-    if (sort && state[obj]) {
-      const data = state[obj];
-      data.sort((a, b) => {
-        if (a[sort] < b[sort]) return -1;
-        else if (a[sort] > b[sort]) return 1;
-
-        return 0;
-      });
-
-      setState({ ...state, [obj]: data });
-    }
-  }, [sort]);
 
   const handleDelete = async (id) => {
     const currentObj = state[obj];

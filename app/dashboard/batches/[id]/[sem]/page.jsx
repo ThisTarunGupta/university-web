@@ -16,15 +16,8 @@ const SemPage = ({ params: { id, sem } }) => {
 
   useEffect(() => {
     const batches = state["batches"];
-    const exams = state["exams"];
     const courses = state["courses"];
     const subjectsObj = state["subjects"];
-
-    if (exams) {
-      const attributes = ["rollNo", "name"];
-      exams.forEach((exam) => attributes.push(exam));
-      setAttributes(attributes);
-    }
 
     if (id && sem && batches && courses && subjectsObj && !subjects) {
       let newSubjects = {};
@@ -54,6 +47,23 @@ const SemPage = ({ params: { id, sem } }) => {
       setSubjects(newSubjects);
     }
   }, [id, sem, state]);
+
+  useEffect(() => {
+    const attributes = ["rollno", "name"];
+    const exams = state["exams"];
+    const subjects = state["subjects"];
+    if (exams && subject && subjects) {
+      const slug = subjects.find(
+        (subjectObj) => subjectObj.id === subject
+      ).slug;
+      if (slug)
+        slug === "practical" || slug === "project"
+          ? attributes.push(...Object.keys(exams.practical))
+          : attributes.push(...Object.keys(exams.core));
+
+      setAttributes(attributes);
+    }
+  }, [state, subject]);
 
   const handleEdit = async () => {
     const studentIds = Object.keys(data);
@@ -141,15 +151,13 @@ const SemPage = ({ params: { id, sem } }) => {
           ))}
         </select>
       )}
-      {attributes && state["students"] && subject && (
+      {attributes && state["exams"] && state["students"] && subject && (
         <table className="table my-5 text-justify">
           <thead>
             <tr className="table-dark">
               {attributes.map((attribute, indx) => (
                 <th key={indx} scope="col">
-                  {attribute.name
-                    ? attribute.name.toUpperCase()
-                    : attribute.toUpperCase()}
+                  {attribute.toUpperCase()}
                 </th>
               ))}
             </tr>
@@ -159,7 +167,7 @@ const SemPage = ({ params: { id, sem } }) => {
               <tr key={indx}>
                 {attributes.map((attribute, indx) => (
                   <td key={indx}>
-                    {["rollNo", "name"].includes(attribute) ? (
+                    {["rollno", "name"].includes(attribute) ? (
                       student[attribute]
                     ) : (
                       <input
@@ -168,21 +176,27 @@ const SemPage = ({ params: { id, sem } }) => {
                         value={
                           (data &&
                             data[student.id] &&
-                            data[student.id][attribute.name]) ||
+                            data[student.id][attribute]) ||
                           (student.marks &&
                             student.marks[subject] &&
-                            student.marks[subject][attribute.name]) ||
-                          ""
+                            student.marks[subject][attribute]) ||
+                          0
                         }
                         onChange={({ target: { value } }) => {
-                          if (value >= 0 && value <= attribute.marks) {
+                          const maxMarks = ["internal", "external"].includes(
+                            attribute
+                          )
+                            ? state["exams"].practical[attribute]
+                            : state["exams"].core[attribute];
+                          console.log(maxMarks);
+                          if (value >= 0 && value <= maxMarks) {
                             setData({
                               ...(data || {}),
                               [student.id]: {
                                 ...((student.marks && student.marks[subject]) ||
                                   {}),
                                 ...((data && data[student.id]) || {}),
-                                [attribute.name]: parseInt(value),
+                                [attribute]: parseInt(value),
                               },
                             });
                           }
