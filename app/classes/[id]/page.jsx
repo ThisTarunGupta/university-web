@@ -16,7 +16,7 @@ const ClassPage = ({ params: { id } }) => {
     if (user) {
       const initStudents = async () => {
         const res = await fetch(
-          `/api/students?uid=${user.id}&&batch=${slug[0]}`,
+          `/api/students?uid=${user.id}&&batch=${slug[0]}&&subject=${slug[1]}`,
           {
             cache: "no-cache",
           }
@@ -25,28 +25,27 @@ const ClassPage = ({ params: { id } }) => {
       };
       !state["students"] && initStudents();
     }
-
-    return () => setState({ students: null });
   }, [slug, user]);
 
   useEffect(() => {
     const batches = state["batches"];
     const examsData = state["exams"];
-    const subjects = state["subjects"];
-    if (batches && slug && subjects && !name)
+    const subject =
+      state["subjects"] &&
+      state["subjects"].find((subject) => subject.id === slug[1]);
+
+    if (batches && !exams && slug && subject && !name)
       setName({
         batch: batches.find((batch) => batch.id === slug[0]).name,
-        subject: subjects.find((subject) => subject.id === slug[1]).name,
+        subject: subject.name,
       });
 
-    if (!exams && subjects) {
-      const subjectSlug = subjects.find(
-        (subject) => subject.id === slug[1]
-      ).slug;
-      ["practical", "project"].includes(subjectSlug)
-        ? setExams(Object.keys(examsData.practical))
-        : setExams(Object.keys(examsData.core));
-    }
+    if (!exams && examsData && !name && subject)
+      subject.slug === "practical"
+        ? setExams(["internal", "external"])
+        : examsData[subject.slug]
+        ? setExams(["Examination"])
+        : setExams(["minor1", "minor2", "reminor", "major"]);
   }, [slug, state]);
 
   return (
@@ -61,7 +60,10 @@ const ClassPage = ({ params: { id } }) => {
           </span>
         </div>
       )}
-      <div className="row row-cols-1 row-cols-md-4 g-4 my-5 h-100">
+      <div
+        className="row row-cols-1 row-cols-md-4 g-4 my-5"
+        style={{ height: "50vh" }}
+      >
         {exams &&
           exams.map((exam, indx) => (
             <div key={indx} className="col">

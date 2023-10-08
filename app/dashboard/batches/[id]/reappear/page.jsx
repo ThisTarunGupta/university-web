@@ -24,21 +24,24 @@ const ReapearPage = ({ params: { id } }) => {
       students.forEach(({ id, rollno, name, marks }) => {
         if (marks) {
           const reappear = [];
+          const reappearIn = [];
           const subjectsKey = Object.keys(marks);
           if (subjectsKey.length) {
             subjectsKey.forEach((subjectKey) => {
               const examsData = Object.keys(marks[subjectKey]);
               if (examsData) {
                 if (
-                  examsData.filter((examData) =>
+                  examsData.find((examData) =>
                     ["internal", "external"].includes(examData)
-                  )
-                )
+                  ) &&
                   (parseInt(marks[subjectKey].internal) || 0) +
                     (parseInt(marks[subjectKey].external) || 0) <
-                    0.7 * exams.practical.internal && reappear.push(subjectKey);
-                else if (
-                  examsData.filter((examData) =>
+                    0.7 * exams.practical
+                ) {
+                  reappearIn.push("all");
+                  reappear.push(subjectKey);
+                } else if (
+                  examsData.find((examData) =>
                     ["minor1", "minor2", "reminor", "major"].includes(examData)
                   )
                 ) {
@@ -55,20 +58,40 @@ const ReapearPage = ({ params: { id } }) => {
 
                   minorMarks.sort((a, b) => {
                     if (a === null) return 1;
-                    else if (a < b) return -1;
-                    else if (a > b) return 1;
+                    else if (a < b) return 1;
+                    else if (a > b) return -1;
                   });
 
-                  if (
-                    minorMarks[0] + minorMarks[1] < 0.7 * exams.core.minor1 ||
-                    majorMarks < 0.35 * exams.core.major
-                  )
+                  if (minorMarks[0] + minorMarks[1] < 0.7 * exams.minor) {
+                    reappearIn.push("all");
                     reappear.push(subjectKey);
-                } else {
+                  } else if (majorMarks < 0.35 * exams.major) {
+                    reappearIn.push("major");
+                    reappear.push(subjectKey);
+                  }
+                } else if (
+                  examsData.includes("examination") &&
+                  marks[subjectKey].examination <
+                    0.35 *
+                      exams[
+                        subjects.find((subject) => subject.id === subjectKey)
+                          .slug
+                      ]
+                ) {
+                  reappearIn.push("all");
+                  reappear.push(subjectKey);
                 }
-              } else data.push({ id, rollno, name, minor: "all" });
+              } else
+                data.push({
+                  id,
+                  rollno,
+                  name,
+                  reappear: null,
+                  reappearIn: null,
+                });
             });
-          } else data.push({ id, rollno, name, minor: "all" });
+          } else
+            data.push({ id, rollno, name, reappear: null, reappearIn: null });
 
           reappear.forEach((subjectId) => {
             const name = subjects.find(
@@ -76,7 +99,7 @@ const ReapearPage = ({ params: { id } }) => {
             ).name;
             mapToSubject[subjectId] = name || "Untitled";
           });
-          data.push({ id, rollno, name, reappear });
+          data.push({ id, rollno, name, reappear, reappearIn });
         }
       });
 
@@ -86,14 +109,75 @@ const ReapearPage = ({ params: { id } }) => {
 
   const handleReappear = () => {
     let flag = 0;
+    const exams = state["exams"];
+    const students = state["students"];
+    students.forEach(({ marks, reappear, reappearIn }) => {
+      if (reappear && reappear.length) {
+        reappear.forEach(subject, (indx) => {
+          const newSubjectMarks = {};
+          if (reappearIn[indx] === "all") {
+            let exam;
+            const tempMarks = [];
+            if (
+              Object.keys(marks[subject]).includes([
+                "minor1",
+                "minor2",
+                "reminor",
+                "major",
+              ])
+            ) {
+              tempMarks.push(
+                ...[
+                  parseInt(marks[subject].minor1) || 0,
+                  parseInt(marks[subject].minor2) || 0,
+                  parseInt(marks[subject].reminor) || 0,
+                ]
+              );
+              exam = "minor";
+            } else if (
+              Object.keys(marks[subject]).includes(["internal", "external"])
+            ) {
+              tempMarks.push(
+                ...[
+                  parseInt(marks[subject].internal || 0),
+                  parseInt(marks[subject].external || 0),
+                ]
+              );
+              exam = "practical";
+            }
+
+            tempMarks.sort((a, b) => {
+              if (a === null) return 1;
+              else if (a < b) return 1;
+              else if (a > b) return -1;
+            });
+
+            if (
+              tempMarks[0] + tempMarks[1] < 0.7 * exam === "minor"
+                ? exams.minor
+                : exams.practical
+            )
+              Object.keys(marks[subject]).forEach(
+                (exam) => (newSubjectMarks[exam] = null)
+              );
+            else if (majorMarks < 0.35 * exams.major) {
+              reappearIn.push("major");
+              reappear.push(subjectKey);
+            }
+          } else if (reappearIn[indx] === "major")
+            marks[subject] = newSubjectMarks;
+        });
+      }
+    });
+
     data &&
-      data.forEach(async ({ id, reappear }) => {
+      data.forEach(async ({ id, reappear, reappearIn }) => {
         const res = await fetch(`/api/students?uid=${user.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id, reappear }),
+          body: JSON.stringify({ id, reappear, reappearIn }),
         });
         const { error } = await res.json();
         if (error) return (flag = 1);

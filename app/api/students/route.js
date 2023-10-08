@@ -24,7 +24,7 @@ export async function GET(req) {
   const data = [];
   const searchParams = new URL(req.url).searchParams;
   const batch = searchParams.get("batch");
-  const uid = searchParams.get("uid");
+  const subject = searchParams.get("subject");
   if (batch) {
     const querySnapshot = await getDocs(
       query(collection(db, collectionName), where("batch", "==", batch))
@@ -36,6 +36,21 @@ export async function GET(req) {
       });
 
     querySnapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+
+    if (subject) {
+      const querySnapshot = await getDocs(
+        query(
+          collection(db, collectionName),
+          where("reappear", "array-contains", subject)
+        )
+      );
+      !querySnapshot.empty &&
+        querySnapshot.forEach(
+          (doc) =>
+            doc.data().batch !== batch &&
+            data.push({ id: doc.id, ...doc.data() })
+        );
+    }
 
     let batchLength;
     const rollno = data[0].rollno;
@@ -88,14 +103,14 @@ export async function POST(req) {
 }
 
 export async function PUT(req) {
-  const { id, data, exam, merge, reappear, ref } = await req.json();
+  const { id, data, exam, merge, reappear, reappearIn, ref } = await req.json();
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    if (id && reappear) {
-      console.log(id, reappear);
+    if (id && reappear && reappearIn)
       updateDoc(doc(db, collectionName, id), {
         reappear,
+        reappearIn,
       });
-    } else if (ref === "details") {
+    else if (ref === "details") {
       const { id, rollno, name, parantage, email, phone } = data;
       if (id && rollno && name && parantage && email && phone) {
         updateDoc(doc(db, collectionName, id), {

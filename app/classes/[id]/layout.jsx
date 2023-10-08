@@ -7,8 +7,12 @@ import AuthContext from "@/app/context/auth";
 
 const ClassLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const { state } = useContext(StateContext);
+  const { state, setState } = useContext(StateContext);
   const [menu, setMenu] = useState(null);
+
+  useEffect(() => {
+    return () => setState({ students: null });
+  }, []);
 
   useEffect(() => {
     const batches = state["batches"];
@@ -31,12 +35,12 @@ const ClassLayout = ({ children }) => {
   }, [state, user]);
 
   return (
-    <div className="container py-5" style={{ height: "100vh" }}>
+    <div className="container py-5" style={{ minHeight: "100vh" }}>
       <div className="row">
         <div className="col-2">
           <Sidebar menu={menu} baseURL="/classes" />
         </div>
-        <div className="col">{children}</div>
+        <div className="col h-100">{children}</div>
       </div>
     </div>
   );

@@ -93,16 +93,26 @@ const ResultPage = ({ params: { id } }) => {
     if (formData.sem && formData.subject && exams && subjects) {
       if (formData.subject === "all")
         setFormData({
-          exams: [...Object.keys(exams.core), ...Object.keys(exams.practical)],
+          exams: [
+            "minor1",
+            "minor2",
+            "reminor",
+            "major",
+            "internal",
+            "external",
+            "examination",
+          ],
         });
       else {
         const slug = subjects.find(
           (subject) => subject.id === formData.subject
         ).slug;
         if (slug)
-          ["practical", "project"].includes(slug)
-            ? setFormData({ exams: Object.keys(exams.practical) })
-            : setFormData({ exams: Object.keys(exams.core) });
+          slug === "practical"
+            ? setFormData({ exams: ["internal", "external"] })
+            : exams[slug]
+            ? setFormData({ exams: ["examination"] })
+            : setFormData({ exams: ["minor1", "minor2", "reminor"] });
       }
     }
   }, [formData.sem, formData.subject, state]);

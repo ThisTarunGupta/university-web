@@ -1,11 +1,10 @@
 "use client";
-import { Suspense, useContext, useEffect, useReducer, useState } from "react";
 import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
 
-import Switch from "@/app/components/switch";
 import AuthContext from "@/app/context/auth";
 import StateContext from "@/app/context/state";
-import LoadingPage from "@/app/loading";
+import Switch from "@/app/components/switch";
 
 const ExamPage = ({ params: { id, exam } }) => {
   const slug = id.split("-");
@@ -19,40 +18,44 @@ const ExamPage = ({ params: { id, exam } }) => {
   useEffect(() => {
     const batches = state["batches"];
     const exams = state["exams"];
-    const subjects = state["subjects"];
+    const subject =
+      state["subjects"] &&
+      state["subjects"].find((subject) => subject.id === slug[1]);
     const students = state["students"];
-    if (batches && exams && slug && subjects && !name)
+    if (batches && exams && slug && subject && !name)
       setName({
         batch: batches.find((batch) => batch.id === slug[0]).name,
-        subject: subjects.find((subject) => subject.id === slug[1]).name,
+        subject: subject.name,
         exam,
-        maxMarks: exams.find(
-          (obj) => obj.name.replace(" ", "").toLowerCase() === exam
-        )["marks"],
+        maxMarks:
+          subject.slug === "practical"
+            ? exams.practical
+            : exams[subject.slug] && exam === "major"
+            ? exams.major
+            : exams.minor,
       });
 
-    if (students && exams && name) {
+    if (!data && students && exams && !name) {
       if (["major", "reminor"].includes(exam)) {
-        const minorMaxMarks = exams.find(
-          (obj) => obj.name.replace(" ", "").toLowerCase() === "minor1"
-        )["marks"];
+        const minorMaxMarks = exams.minor;
         const newData = students.filter((student) => {
           const marks = student["marks"][slug[1]];
           if (marks) {
-            const minor1 = marks["minor1"];
-            const minor2 = marks["minor2"];
-            const reminor = marks["reminor"];
+            const minor1 = parseInt(marks["minor1"]) || null;
+            const minor2 = parseInt(marks["minor2"]) || null;
+            const reminor = parseInt(marks["reminor"]) || null;
 
             const temp = [minor1, minor2, reminor];
             temp.sort((a, b) => {
-              if (a === null) return 1;
-              else if (a > b) return -1;
+              if (a > b) return -1;
               else if (a < b) return 1;
+
+              return 0;
             });
 
             if (exam === "major")
-              return temp[0] !== null &&
-                temp[1] !== null &&
+              return temp[0] &&
+                temp[1] &&
                 temp[0] + temp[1] >= minorMaxMarks * 0.7
                 ? true
                 : false;
@@ -68,7 +71,7 @@ const ExamPage = ({ params: { id, exam } }) => {
         setData(newData);
       } else setData(students);
     }
-  }, [name, state]);
+  }, [exam, slug, state]);
 
   useEffect(() => {
     if (data && !edit) {
@@ -90,6 +93,7 @@ const ExamPage = ({ params: { id, exam } }) => {
   const handleSubmit = async () => {
     const keys = Object.keys(formData);
     const currentStudents = state["students"];
+    console.log(state["students"]);
     const updatedStudents = currentStudents;
     updatedStudents.forEach((student) => {
       if (keys.includes(student.id)) {
@@ -170,7 +174,7 @@ const ExamPage = ({ params: { id, exam } }) => {
           </tr>
         </thead>
         <tbody>
-          {data ? (
+          {data && name ? (
             data.map((student, indx) => {
               const marks =
                 student["marks"] &&
@@ -195,7 +199,10 @@ const ExamPage = ({ params: { id, exam } }) => {
                             setFormData({
                               ...formData,
                               [student.id]: parseInt(
-                                (value >= 0 && value <= 20 && value) || 0
+                                (value >= 0 &&
+                                  value <= name.maxMarks &&
+                                  value) ||
+                                  0
                               ),
                             })
                           }

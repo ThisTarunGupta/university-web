@@ -28,13 +28,12 @@ const DashboardComponent = ({
     }),
     stateFormat
   );
-  const [importedData, setImportedData] = useState();
   const [message, setMessage] = useState({ data: "", varient: "" });
 
   const handleDelete = async (id) => {
     const currentObj = state[obj];
     const updatedObj = currentObj.filter((obj) => obj.id !== id);
-    setState({ ...state, [obj]: updatedObj });
+    setState({ [obj]: updatedObj });
 
     const res = await fetch(`${api}?uid=${user.id}&&id=${id}`, {
       method: "DELETE",
@@ -109,7 +108,7 @@ const DashboardComponent = ({
           varient: "success",
         });
       }
-      setState({ ...state, [obj]: updatedObj });
+      setState({ [obj]: updatedObj });
     } else {
       setMessage({
         data: error,
@@ -201,7 +200,7 @@ const DashboardComponent = ({
             });
         };
       } else
-        return setMessage({ data: "Invalid file choose", varient: "danger" });
+        return setMessage({ data: "Invalid file choosen", varient: "danger" });
     }
   };
 

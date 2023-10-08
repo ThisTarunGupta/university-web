@@ -57,9 +57,11 @@ const SemPage = ({ params: { id, sem } }) => {
         (subjectObj) => subjectObj.id === subject
       ).slug;
       if (slug)
-        slug === "practical" || slug === "project"
-          ? attributes.push(...Object.keys(exams.practical))
-          : attributes.push(...Object.keys(exams.core));
+        slug === "practical"
+          ? attributes.push(...["internal", "external"])
+          : exams[slug]
+          ? attributes.push("Examination")
+          : attributes.push(...["minor1", "minor2", "reminor", "major"]);
 
       setAttributes(attributes);
     }
