@@ -30,7 +30,7 @@ const ExamPage = ({ params: { id, exam } }) => {
         maxMarks:
           subject.slug === "practical"
             ? exams.practical
-            : exams[subject.slug] &&
+            : exams[subject.slug] ||
               (exam === "major" ? exams.major : exams.minor),
       });
 
