@@ -30,9 +30,8 @@ const ExamPage = ({ params: { id, exam } }) => {
         maxMarks:
           subject.slug === "practical"
             ? exams.practical
-            : exams[subject.slug] && exam === "major"
-            ? exams.major
-            : exams.minor,
+            : exams[subject.slug] &&
+              (exam === "major" ? exams.major : exams.minor),
       });
 
     if (!data && students && exams && !name) {
@@ -93,7 +92,6 @@ const ExamPage = ({ params: { id, exam } }) => {
   const handleSubmit = async () => {
     const keys = Object.keys(formData);
     const currentStudents = state["students"];
-    console.log(state["students"]);
     const updatedStudents = currentStudents;
     updatedStudents.forEach((student) => {
       if (keys.includes(student.id)) {
