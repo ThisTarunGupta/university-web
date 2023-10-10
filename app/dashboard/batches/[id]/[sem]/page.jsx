@@ -24,8 +24,8 @@ const SemPage = ({ params: { id, sem } }) => {
       const courseId = batches.find((batch) => batch.id === id).course;
       let oldSubjects = courses.find((course) => course.id === courseId)
         .subjects[sem];
-      const keys = Object.keys(oldSubjects);
-      if (keys.length) {
+      const keys = Object.keys(oldSubjects || {});
+      if (keys && keys.length) {
         keys.forEach((key) => {
           const keySubjects = oldSubjects[key];
           const updatedKeySubjects = [];
@@ -153,65 +153,77 @@ const SemPage = ({ params: { id, sem } }) => {
           ))}
         </select>
       )}
-      {attributes && state["exams"] && state["students"] && subject && (
-        <table className="table my-5 text-justify">
-          <thead>
-            <tr className="table-dark">
-              {attributes.map((attribute, indx) => (
-                <th key={indx} scope="col">
-                  {attribute.toUpperCase()}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {state["students"].map((student, indx) => (
-              <tr key={indx}>
+      {attributes &&
+        state["exams"] &&
+        state["students"] &&
+        state["subjects"] &&
+        subject && (
+          <table className="table my-5 text-justify">
+            <thead>
+              <tr className="table-dark">
                 {attributes.map((attribute, indx) => (
-                  <td key={indx}>
-                    {["rollno", "name"].includes(attribute) ? (
-                      student[attribute]
-                    ) : (
-                      <input
-                        className="form-input"
-                        style={{ width: "100%" }}
-                        value={
-                          (data &&
-                            data[student.id] &&
-                            data[student.id][attribute]) ||
-                          (student.marks &&
-                            student.marks[subject] &&
-                            student.marks[subject][attribute]) ||
-                          0
-                        }
-                        onChange={({ target: { value } }) => {
-                          const maxMarks = ["internal", "external"].includes(
-                            attribute
-                          )
-                            ? state["exams"].practical[attribute]
-                            : state["exams"].core[attribute];
-                          console.log(maxMarks);
-                          if (value >= 0 && value <= maxMarks) {
-                            setData({
-                              ...(data || {}),
-                              [student.id]: {
-                                ...((student.marks && student.marks[subject]) ||
-                                  {}),
-                                ...((data && data[student.id]) || {}),
-                                [attribute]: parseInt(value),
-                              },
-                            });
-                          }
-                        }}
-                      />
-                    )}
-                  </td>
+                  <th key={indx} scope="col">
+                    {attribute.toUpperCase()}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {state["students"].map((student, indx) => (
+                <tr key={indx}>
+                  {attributes.map((attribute, indx) => (
+                    <td key={indx}>
+                      {["rollno", "name"].includes(attribute) ? (
+                        student[attribute]
+                      ) : (
+                        <input
+                          className="form-input"
+                          style={{ width: "100%" }}
+                          value={
+                            (data &&
+                              data[student.id] &&
+                              data[student.id][attribute]) ||
+                            (student.marks &&
+                              student.marks[subject] &&
+                              student.marks[subject][attribute]) ||
+                            0
+                          }
+                          onChange={({ target: { value } }) => {
+                            const maxMarks = ["internal", "external"].includes(
+                              attribute
+                            )
+                              ? state["exams"].practical
+                              : ["minor1", "minor2"].includes(attribute)
+                              ? state["exams"].minor
+                              : attribute === "major"
+                              ? state["exams"].major
+                              : state["exams"][
+                                  state["subjects"].find(
+                                    ({ id }) => id === subject
+                                  ).slug
+                                ] || 100;
+                            if (value >= 0 && value <= maxMarks) {
+                              setData({
+                                ...(data || {}),
+                                [student.id]: {
+                                  ...((student.marks &&
+                                    student.marks[subject]) ||
+                                    {}),
+                                  ...((data && data[student.id]) || {}),
+                                  [attribute]: parseInt(value),
+                                },
+                              });
+                            }
+                          }}
+                        />
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
     </>
   );
 };

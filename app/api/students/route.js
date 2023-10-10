@@ -88,6 +88,7 @@ export async function POST(req) {
         parentage: parentage.trim(),
         email: email.trim(),
         phone: phone,
+        marks: {},
       });
       return docRef
         ? NextResponse.json({

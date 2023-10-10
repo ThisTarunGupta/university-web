@@ -7,6 +7,8 @@ import {
   deleteDoc,
   doc,
   setDoc,
+  query,
+  where,
 } from "firebase/firestore/lite";
 
 import { db } from "@/app/firebaseConfig";
@@ -71,9 +73,18 @@ export async function DELETE(req) {
   if (await isAdmin(searchParams.get("uid"))) {
     const id = searchParams.get("id");
     if (id) {
-      deleteDoc(doc(db, collectionName, id));
+      const querySnapshot = await getDocs(
+        query(collection(db, "batches"), where("course", "==", id))
+      );
+      if (querySnapshot.empty) {
+        deleteDoc(doc(db, collectionName, id));
+        return NextResponse.json({ error: null, data: null });
+      }
 
-      return NextResponse.json({ error: null, data: null });
+      return NextResponse.json({
+        error: "First delete respective batch",
+        data: null,
+      });
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }

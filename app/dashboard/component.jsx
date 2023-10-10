@@ -38,9 +38,9 @@ const DashboardComponent = ({
     const res = await fetch(`${api}?uid=${user.id}&&id=${id}`, {
       method: "DELETE",
     });
-    const { error, _ } = await res.json();
+    const { error } = await res.json();
     if (error) {
-      setState({ ...state, [obj]: currentObj });
+      setState({ [obj]: currentObj });
       return setMessage({
         data: error,
         varient: "danger",
@@ -305,10 +305,17 @@ const DashboardComponent = ({
                       id={key}
                       name={key}
                       value={formData[key]}
-                      minLength={key === "phone" && 10}
-                      maxLength={key === "phone" && 10}
+                      minLength={key === "phone" ? 10 : undefined}
+                      maxLength={key === "phone" ? 10 : undefined}
                       onChange={({ target: { value } }) =>
-                        setFormData({ [key]: value })
+                        setFormData({
+                          [key]:
+                            key === "phone"
+                              ? !isNaN(value)
+                                ? value
+                                : undefined
+                              : value,
+                        })
                       }
                       required
                     />

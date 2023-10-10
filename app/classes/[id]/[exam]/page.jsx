@@ -38,7 +38,7 @@ const ExamPage = ({ params: { id, exam } }) => {
       if (["major", "reminor"].includes(exam)) {
         const minorMaxMarks = exams.minor;
         const newData = students.filter((student) => {
-          const marks = student["marks"][slug[1]];
+          const marks = student["marks"] && student["marks"][slug[1]];
           if (marks) {
             const minor1 = parseInt(marks["minor1"]) || null;
             const minor2 = parseInt(marks["minor2"]) || null;
