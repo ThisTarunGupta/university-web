@@ -146,7 +146,7 @@ export async function DELETE(req) {
         { disabled: true },
         { merge: true }
       );
-      return NextResponse.json({ error: "Error in deleting user", data: null });
+      return NextResponse.json({ error: null, data: null });
     } else return NextResponse.json({ error: "Invalid data", data: null });
   }
   return NextResponse.json({ error: "Not authorized", data: null });
