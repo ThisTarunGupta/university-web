@@ -5,7 +5,6 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  setDoc,
   getDoc,
   updateDoc,
   query,
@@ -25,7 +24,9 @@ export async function GET(req) {
   const searchParams = new URL(req.url).searchParams;
   const batch = searchParams.get("batch");
   const subject = searchParams.get("subject");
-  if (batch) {
+  const uid = searchParams.get("uid");
+
+  if ((await isAdmin(uid)) === true && batch) {
     const querySnapshot = await getDocs(
       query(collection(db, collectionName), where("batch", "==", batch))
     );
@@ -36,34 +37,94 @@ export async function GET(req) {
       });
 
     querySnapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+  } else if (batch && subject) {
+    const batchesId = [];
+    const batchDocSnap = await getDoc(doc(db, "batches", batch));
+    if (!batchDocSnap.exists())
+      return NextResponse.json({
+        error: "Error in reading batch",
+        data: null,
+      });
 
-    if (subject) {
-      const querySnapshot = await getDocs(
-        query(
-          collection(db, collectionName),
-          where("reappear", "array-contains", subject)
-        )
-      );
-      !querySnapshot.empty &&
-        querySnapshot.forEach(
-          (doc) =>
-            doc.data().batch !== batch &&
-            data.push({ id: doc.id, ...doc.data() })
-        );
-    }
+    const course = batchDocSnap.data().course;
+    const courseDocSnap = await getDoc(doc(db, "courses", course));
+    if (!courseDocSnap.exists())
+      return NextResponse.json({
+        error: "Error in reading course",
+        data: null,
+      });
 
-    let batchLength;
-    const rollno = data[0].rollno;
-    for (let i = 0; i < rollno.length; i++)
-      if (isNaN(rollno[i])) {
-        batchLength = rollno.length - i;
-        break;
+    const deltaYear =
+      (new Date().getFullYear() + "").slice(-2) -
+      parseInt(courseDocSnap.data().maxDuration);
+    const batchesQuerySnapshot = await getDocs(
+      query(collection(db, "batches"), where("course", "==", course))
+    );
+    if (batchesQuerySnapshot.empty)
+      return NextResponse.json({
+        error: "Error in reading batches",
+        data: null,
+      });
+
+    batchesQuerySnapshot.forEach((doc) => {
+      const { slug } = doc.data();
+      const year = parseInt(slug.slice(-2));
+      if (doc.id !== batch && year >= deltaYear) batchesId.push(doc.id);
+    });
+
+    const studentQuerySnapshot = await getDocs(
+      query(
+        collection(db, collectionName),
+        where("batch", "in", [batch, ...batchesId])
+      )
+    );
+    if (studentQuerySnapshot.empty)
+      return NextResponse.json({
+        error: "Error in reading students",
+        data: null,
+      });
+
+    studentQuerySnapshot.forEach((doc) => {
+      const student = doc.data();
+      if (student.batch === batch) data.push({ id: doc.id, ...student });
+      else if (student.marks && student.marks[subject]) {
+        const marks = student.marks[subject];
+        if (Object.keys(marks).includes("minor1")) {
+          const tempMinor = [
+            parseInt(marks.minor1) || 0,
+            parseInt(marks.minor2) || 0,
+            parseInt(marks.reminor) || 0,
+          ].sort((a, b) => {
+            if (a > b) return -1;
+            else if (a < b) return 1;
+
+            return 0;
+          });
+          if (tempMinor[0] + tempMinor[1] < 14)
+            data.push({ id: doc.id, ...student });
+          else if ((parseInt(marks.major) || 0) < 21)
+            data.push({ id: doc.id, ...student });
+        }
       }
+    });
+  }
+
+  if (data.length) {
     data.sort((a, b) => {
-      const _a = a.rollno.substring(0, a.rollno.length - batchLength);
-      const _b = b.rollno.substring(0, a.rollno.length - batchLength);
-      if (_a < _b) return -1;
-      else if (_a > _b) return 1;
+      const _a = a.rollno.slice(-2);
+      const _b = b.rollno.slice(-2);
+      if (_a < _b) return 1;
+      else if (_a > _b) return -1;
+
+      return 0;
+    });
+    data.sort((a, b) => {
+      const _a = a.rollno;
+      const _b = b.rollno;
+      if (_a.slice(-2) === _b.slice(-2) && _a.slice(0, 2) < _b.slice(0, 2))
+        return -1;
+      else if (_a.slice(-2) === _b.slice(-2) && _a.slice(0, 2) > _b.slice(0, 2))
+        return 1;
 
       return 0;
     });
@@ -78,8 +139,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    const { batch, rollno, name, parentage, email, phone, reappear } =
-      await req.json();
+    const { batch, rollno, name, parentage, email, phone } = await req.json();
     if (batch && rollno && name && parentage && email && phone) {
       const docRef = await addDoc(collection(db, collectionName), {
         batch: batch.trim(),
@@ -104,14 +164,9 @@ export async function POST(req) {
 }
 
 export async function PUT(req) {
-  const { id, data, exam, merge, reappear, reappearIn, ref } = await req.json();
+  const { id, data, exam, merge, ref } = await req.json();
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    if (id && reappear && reappearIn)
-      updateDoc(doc(db, collectionName, id), {
-        reappear,
-        reappearIn,
-      });
-    else if (ref === "details") {
+    if (ref === "details") {
       const { id, rollno, name, parantage, email, phone } = data;
       if (id && rollno && name && parantage && email && phone) {
         updateDoc(doc(db, collectionName, id), {

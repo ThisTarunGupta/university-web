@@ -2,8 +2,8 @@
 import { config } from "dotenv";
 import { useEffect, useState } from "react";
 import { Poppins } from "next/font/google";
-
 import "bootstrap/dist/css/bootstrap.min.css";
+
 import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";

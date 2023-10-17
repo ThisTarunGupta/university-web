@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { useContext, useEffect, useReducer, useState } from "react";
 
-import StateContext from "@/app/context/state";
 import ResultDisplay from "@/app/components/resultDisplay";
+import StateContext from "@/app/context/state";
 
 const initialFormData = {
   exam: null,
@@ -16,10 +16,7 @@ const initialFormData = {
 
 const ResultPage = ({ params: { id } }) => {
   const { state } = useContext(StateContext);
-  const [addCaptions, setAddCaptions] = useState(null);
   const [attributes, setAttributes] = useState(null);
-  const [captions, setCaptions] = useState(null);
-  const [showRequestScreen, setShowRequestScreen] = useState(null);
   const [data, setData] = useState(null);
   const [formData, setFormData] = useReducer(
     (current, update) => ({
@@ -28,7 +25,6 @@ const ResultPage = ({ params: { id } }) => {
     }),
     initialFormData
   );
-  const [message, setMessage] = useState({ data: null, varient: null });
   const [subjectsList, setSubjectsList] = useState(null);
   const [title, setTitle] = useState(null);
 
@@ -243,9 +239,9 @@ const ResultPage = ({ params: { id } }) => {
             );
           else {
             if (formData.subject === "all" && formData.exam === "all")
-              Object.keys(student.marks).forEach((subject) => {
-                populateSubjectsMarks(subject);
-              });
+              Object.keys(student.marks).forEach((subject) =>
+                populateSubjectsMarks(subject)
+              );
             else if (formData.subject === "all" && formData.exam !== "all") {
               Object.keys(student.marks).forEach((subject) => {
                 marks[subject] = student.marks
@@ -260,6 +256,7 @@ const ResultPage = ({ params: { id } }) => {
                   ? student.marks[formData.subject][formData.exam]
                   : "NA";
           }
+          console.log(Object.keys(marks).length);
           if (Object.keys(marks).length)
             data.push({
               rollno: student.rollno,
@@ -280,203 +277,143 @@ const ResultPage = ({ params: { id } }) => {
       if (formData.exam !== "all")
         subTitle += `Examination: ${formData.exam.toUpperCase()}; `;
 
+      console.log(data);
       setData(data);
       setTitle([`${batch.name} Result`, subTitle.trim()]);
     }
   };
 
-  const handleRequest = async (captions) => {
-    if (captions) {
-      const res = await fetch(`/api/requests/?uid=${user.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          batch: id,
-          sem: formData.sem,
-          subject: formData.subject,
-          exam: formData.exam,
-          user: Object.keys(captions),
-          captions,
-        }),
-      });
-    }
-  };
-
   return (
     <div className="h-100">
-      {message.data && (
-        <div className={`alert alert-${message.varient}`}>{message.data}</div>
-      )}
-      {showRequestScreen ? (
-        <>
-          <div className="d-flex align-items-center justify-content-between">
-            <button
-              className="btn btn-outline-primary"
-              onClick={() => setShowRequestScreen(false)}
+      <>
+        <Link href={`/dashboard/batches/${id}`}>
+          <button className="btn btn-outline-primary">
+            <i className="fa-solid fa-arrow-left me-2"></i>
+            Back
+          </button>
+        </Link>
+        <div className="row my-3">
+          <div className="col">
+            <label htmlFor="sem" className="form-label">
+              Semester:
+            </label>
+            <select
+              className="form-select"
+              defaultValue={0}
+              onChange={({ target: { value } }) => {
+                if (value > 0)
+                  setFormData({ sem: value, subject: null, exam: null });
+                else setFormData({ sem: value, subject: "all", exam: "all" });
+              }}
             >
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowRequestScreen(false)}
-            >
-              Create request
-            </button>
+              <option value={0} disabled>
+                Select semester
+              </option>
+              {formData.sems && (
+                <>
+                  {formData.sems.map((sem, indx) => (
+                    <option key={indx} value={sem}>
+                      {sem}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
           </div>
-          <h2>Add teachers</h2>
-          {captions &&
-            Object.keys(captions).map((teacher) => (
-              <div key={teacher} className="d-flex align-items-center">
-                {state["users"].find((user) => user.id === teacher).name}
-                {captions[teacher]}
-                <i
-                  className="fa-solid fa-trash text-danger"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => delete captions[teacher]}
-                ></i>
-              </div>
-            ))}
-          <div className="d-flex align-items-center">
-            <i
-              className="fa-solid fa-trash text-danger"
-              style={{ cursor: "pointer" }}
-              onClick={() => delete captions[teacher]}
-            ></i>
-          </div>
-        </>
-      ) : (
-        <>
-          <Link href={`/dashboard/batches/${id}`}>
-            <button className="btn btn-outline-primary">
-              <i className="fa-solid fa-arrow-left me-2"></i>
-              Back
-            </button>
-          </Link>
-          <div className="row my-3">
+          {formData.sem > 0 && (
             <div className="col">
-              <label htmlFor="sem" className="form-label">
-                Semester:
+              <label htmlFor="subjects" className="form-label">
+                Subjects:
               </label>
               <select
                 className="form-select"
                 defaultValue={0}
-                onChange={({ target: { value } }) => {
-                  if (value > 0)
-                    setFormData({ sem: value, subject: null, exam: null });
-                  else setFormData({ sem: value, subject: "all", exam: "all" });
-                }}
+                onChange={({ target: { value } }) =>
+                  setFormData({ subject: value })
+                }
               >
                 <option value={0} disabled>
-                  Select semester
+                  Select subject
                 </option>
-                {formData.sems && (
+                {formData.subjects && (
                   <>
-                    {formData.sems.map((sem, indx) => (
-                      <option key={indx} value={sem}>
-                        {sem}
+                    <option value={"all"}>All subjects</option>
+                    {Object.keys(formData.subjects).map((varient, indx) => (
+                      <optgroup key={indx} label={varient.toUpperCase()}>
+                        {Object.keys(formData.subjects[varient]).map(
+                          (subjectId, indx) => (
+                            <option key={indx} value={subjectId}>
+                              {formData.subjects[varient][subjectId]}
+                            </option>
+                          )
+                        )}
+                      </optgroup>
+                    ))}
+                  </>
+                )}
+              </select>
+            </div>
+          )}
+          {formData.sem > 0 && (
+            <div className="col">
+              <label htmlFor="exam" className="form-label">
+                Exams:
+              </label>
+              <select
+                className="form-select"
+                defaultValue={0}
+                onChange={({ target: { value } }) =>
+                  setFormData({ exam: value })
+                }
+              >
+                <option value={0} disabled>
+                  Select exam
+                </option>
+                <option value={"all"}>All exams</option>
+                {formData.exams && (
+                  <>
+                    {formData.exams.map((exam, indx) => (
+                      <option key={indx} value={exam}>
+                        {exam.toUpperCase()}
                       </option>
                     ))}
                   </>
                 )}
               </select>
             </div>
-            {formData.sem > 0 && (
-              <div className="col">
-                <label htmlFor="subjects" className="form-label">
-                  Subjects:
-                </label>
-                <select
-                  className="form-select"
-                  defaultValue={0}
-                  onChange={({ target: { value } }) =>
-                    setFormData({ subject: value })
-                  }
-                >
-                  <option value={0} disabled>
-                    Select subject
-                  </option>
-                  {formData.subjects && (
-                    <>
-                      <option value={"all"}>All subjects</option>
-                      {Object.keys(formData.subjects).map((varient, indx) => (
-                        <optgroup key={indx} label={varient.toUpperCase()}>
-                          {Object.keys(formData.subjects[varient]).map(
-                            (subjectId, indx) => (
-                              <option key={indx} value={subjectId}>
-                                {formData.subjects[varient][subjectId]}
-                              </option>
-                            )
-                          )}
-                        </optgroup>
-                      ))}
-                    </>
-                  )}
-                </select>
-              </div>
-            )}
-            {formData.sem > 0 && (
-              <div className="col">
-                <label htmlFor="exam" className="form-label">
-                  Exams:
-                </label>
-                <select
-                  className="form-select"
-                  defaultValue={0}
-                  onChange={({ target: { value } }) =>
-                    setFormData({ exam: value })
-                  }
-                >
-                  <option value={0} disabled>
-                    Select exam
-                  </option>
-                  <option value={"all"}>All exams</option>
-                  {formData.exams && (
-                    <>
-                      {formData.exams.map((exam, indx) => (
-                        <option key={indx} value={exam}>
-                          {exam.toUpperCase()}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
-              </div>
-            )}
-          </div>
-          <div className="d-flex my-3">
-            <button
-              className="btn btn-primary"
-              onClick={handleGenerate}
-              disabled={!(formData.sem && formData.exam && formData.subject)}
-            >
-              Generate
-            </button>
-            {data && (
-              <>
-                <button
-                  className="btn btn-outline-warning ms-3"
-                  onClick={handleDownload}
-                >
-                  Download
-                </button>
-              </>
-            )}
-          </div>
-          {attributes && data && subjectsList && title && (
-            <ResultDisplay
-              attributes={attributes}
-              batch={id}
-              data={data}
-              sem={formData.sem}
-              subject={formData.subject}
-              subjectsList={subjectsList}
-              title={title}
-            />
           )}
-        </>
-      )}
+        </div>
+        <div className="d-flex my-3">
+          <button
+            className="btn btn-primary"
+            onClick={handleGenerate}
+            disabled={!(formData.sem && formData.exam && formData.subject)}
+          >
+            Generate
+          </button>
+          {data && (
+            <>
+              <button
+                className="btn btn-outline-warning ms-3"
+                onClick={handleDownload}
+              >
+                Download
+              </button>
+            </>
+          )}
+        </div>
+        {attributes && data && subjectsList && title && (
+          <ResultDisplay
+            attributes={attributes}
+            batch={id}
+            data={data}
+            sem={formData.sem}
+            subject={formData.subject}
+            subjectsList={subjectsList}
+            title={title}
+          />
+        )}
+      </>
     </div>
   );
 };

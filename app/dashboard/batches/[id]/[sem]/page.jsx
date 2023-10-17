@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 
-import StateContext from "@/app/context/state";
 import AuthContext from "@/app/context/auth";
+import StateContext from "@/app/context/state";
 
 const SemPage = ({ params: { id, sem } }) => {
   const { user } = useContext(AuthContext);

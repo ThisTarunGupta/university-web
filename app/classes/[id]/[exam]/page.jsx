@@ -167,6 +167,7 @@ const ExamPage = ({ params: { id, exam } }) => {
         <thead>
           <tr className="table-dark">
             <th scope="col">#</th>
+            <th scope="col">ROLLNO</th>
             <th scope="col">Name</th>
             <th scope="col">Marks</th>
           </tr>
@@ -181,6 +182,7 @@ const ExamPage = ({ params: { id, exam } }) => {
               return (
                 <tr key={student.id}>
                   <th scope="row">{indx + 1}</th>
+                  <td>{student.rollno}</td>
                   <td>{student.name}</td>
                   <td>
                     {edit ? (

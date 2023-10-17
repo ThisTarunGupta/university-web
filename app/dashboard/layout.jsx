@@ -1,18 +1,20 @@
 "use client";
 import { Suspense, useContext, useEffect, useReducer } from "react";
-import AuthContext from "../context/auth";
 import { redirect } from "next/navigation";
+
 import Sidebar from "../components/sidebar";
+import AuthContext from "../context/auth";
 import StateContext from "../context/state";
+import LoadingPage from "../loading";
 
 const menu = [
   {
-    id: "courses",
-    name: "Courses",
-  },
-  {
     id: "subjects",
     name: "Subjects",
+  },
+  {
+    id: "courses",
+    name: "Courses",
   },
   {
     id: "batches",
@@ -62,9 +64,9 @@ const DashboardLayout = ({ children }) => {
           <div className="col-2">
             <Sidebar menu={menu} baseURL="/dashboard" />
           </div>
-          <Suspense fallback={<div>Loading...</div>}>
-            <div className="col h-100">{children}</div>
-          </Suspense>
+          <div className="col h-100">
+            <Suspense fallback={<LoadingPage />}>{children}</Suspense>
+          </div>
         </div>
       </div>
     </StateContext.Provider>

@@ -1,5 +1,6 @@
-import DashboardComponent from "@/app/dashboard/component";
 import Link from "next/link";
+
+import DashboardComponent from "@/app/dashboard/component";
 
 const StudentProps = {
   rollno: "",

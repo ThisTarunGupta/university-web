@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useContext, useEffect, useReducer, useState } from "react";
+import { useContext, useReducer, useState } from "react";
 
 import ClassesManager from "../components/classesManager";
 import CourseSelector from "../components/courseSelector";
