@@ -79,7 +79,7 @@ export async function DELETE(req) {
       if (!querySnapshot.empty)
         querySnapshot.forEach(({ id }) => deleteDoc(doc(db, "students", id)));
 
-      deleteDoc(doc(db, collectionName, id));
+      await deleteDoc(doc(db, collectionName, id));
       return NextResponse.json({ error: null, data: null });
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });

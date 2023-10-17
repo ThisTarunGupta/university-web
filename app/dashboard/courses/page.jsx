@@ -5,6 +5,7 @@ const CourseProps = {
   name: "",
   slug: "",
   duration: 0,
+  maxDuration: 0,
   subjects: {},
 };
 

@@ -77,7 +77,7 @@ export async function DELETE(req) {
         query(collection(db, "batches"), where("course", "==", id))
       );
       if (querySnapshot.empty) {
-        deleteDoc(doc(db, collectionName, id));
+        await deleteDoc(doc(db, collectionName, id));
         return NextResponse.json({ error: null, data: null });
       }
 

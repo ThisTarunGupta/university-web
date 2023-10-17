@@ -141,7 +141,7 @@ export async function DELETE(req) {
   if (await isAdmin(searchParams.get("uid"))) {
     const id = searchParams.get("id");
     if (id) {
-      updateDoc(
+      await updateDoc(
         doc(db, collectionName, searchParams.get("id")),
         { disabled: true },
         { merge: true }

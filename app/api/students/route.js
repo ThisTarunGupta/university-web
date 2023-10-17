@@ -205,7 +205,7 @@ export async function PUT(req) {
 export async function DELETE(req) {
   const searchParams = new URL(req.url).searchParams;
   if (await isAdmin(searchParams.get("uid"))) {
-    deleteDoc(doc(db, collectionName, searchParams.get("id")));
+    await deleteDoc(doc(db, collectionName, searchParams.get("id")));
     return NextResponse.json({ error: null, data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }

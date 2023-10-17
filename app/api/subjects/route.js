@@ -72,7 +72,7 @@ export async function DELETE(req) {
   if (await isAdmin(searchParams.get("uid"))) {
     const id = searchParams.get("id");
     if (id) {
-      deleteDoc(doc(db, collectionName, id));
+      await deleteDoc(doc(db, collectionName, id));
 
       return NextResponse.json({ error: null, data: null });
     } else return NextResponse.json({ error: "Invalid data", data: null });
