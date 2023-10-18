@@ -56,7 +56,7 @@ export async function GET(req) {
 
     const deltaYear =
       (new Date().getFullYear() + "").slice(-2) -
-      parseInt(courseDocSnap.data().maxDuration);
+      parseFloat(courseDocSnap.data().maxDuration);
     const batchesQuerySnapshot = await getDocs(
       query(collection(db, "batches"), where("course", "==", course))
     );
@@ -68,7 +68,7 @@ export async function GET(req) {
 
     batchesQuerySnapshot.forEach((doc) => {
       const { slug } = doc.data();
-      const year = parseInt(slug.slice(-2));
+      const year = parseFloat(slug.slice(-2));
       if (doc.id !== batch && year >= deltaYear) batchesId.push(doc.id);
     });
 
@@ -91,9 +91,9 @@ export async function GET(req) {
         const marks = student.marks[subject];
         if (Object.keys(marks).includes("minor1")) {
           const tempMinor = [
-            parseInt(marks.minor1) || 0,
-            parseInt(marks.minor2) || 0,
-            parseInt(marks.reminor) || 0,
+            parseFloat(marks.minor1) || 0,
+            parseFloat(marks.minor2) || 0,
+            parseFloat(marks.reminor) || 0,
           ].sort((a, b) => {
             if (a > b) return -1;
             else if (a < b) return 1;
@@ -102,7 +102,7 @@ export async function GET(req) {
           });
           if (tempMinor[0] + tempMinor[1] < 14)
             data.push({ id: doc.id, ...student });
-          else if ((parseInt(marks.major) || 0) < 21)
+          else if ((parseFloat(marks.major) || 0) < 21)
             data.push({ id: doc.id, ...student });
         }
       }
@@ -164,17 +164,17 @@ export async function POST(req) {
 }
 
 export async function PUT(req) {
-  const { id, data, exam, merge, ref } = await req.json();
+  const { data, exam, merge, ref } = await req.json();
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     if (ref === "details") {
-      const { id, rollno, name, parantage, email, phone } = data;
-      if (id && rollno && name && parantage && email && phone) {
-        updateDoc(doc(db, collectionName, id), {
+      const { id, rollno, name, parentage, email, phone } = data;
+      if (id && rollno && name && parentage && email && phone) {
+        await updateDoc(doc(db, collectionName, id), {
           rollno: rollno ? rollno.trim() : null,
           name: name ? name.trim() : null,
-          parantage: parantage ? parantage.trim() : null,
+          parentage: parentage ? parentage.trim() : null,
           email: email ? email.trim() : null,
-          phone: phone ? phone.trim() : null,
+          phone: phone,
         });
         return NextResponse.json({ error: null, data: null });
       } else return NextResponse.json({ error: "Invalid data", data: null });
@@ -190,7 +190,7 @@ export async function PUT(req) {
     Object.keys(data).forEach((id) => {
       if (!isNaN(data[id]))
         updateDoc(doc(db, collectionName, id), {
-          [`marks.${ref}.${exam}`]: parseInt(data[id]),
+          [`marks.${ref}.${exam}`]: parseFloat(data[id]),
         });
     });
   else

@@ -36,16 +36,15 @@ const ExamPage = ({ params: { id, exam } }) => {
 
     if (!data && students && exams && !name) {
       if (["major", "reminor"].includes(exam)) {
-        const minorMaxMarks = exams.minor;
         const newData = students.filter((student) => {
           const marks = student["marks"] && student["marks"][slug[1]];
           if (marks) {
-            const minor1 = parseInt(marks["minor1"]) || null;
-            const minor2 = parseInt(marks["minor2"]) || null;
-            const reminor = parseInt(marks["reminor"]) || null;
+            const minor1 = parseFloat(marks["minor1"]) || null;
+            const minor2 = parseFloat(marks["minor2"]) || null;
+            const reminor = parseFloat(marks["reminor"]) || null;
 
-            const temp = [minor1, minor2, reminor];
-            temp.sort((a, b) => {
+            const tempMinor = [minor1, minor2, reminor];
+            tempMinor.sort((a, b) => {
               if (a > b) return -1;
               else if (a < b) return 1;
 
@@ -53,15 +52,13 @@ const ExamPage = ({ params: { id, exam } }) => {
             });
 
             if (exam === "major")
-              return temp[0] &&
-                temp[1] &&
-                temp[0] + temp[1] >= minorMaxMarks * 0.7
+              return tempMinor[0] &&
+                tempMinor[1] &&
+                tempMinor[0] + tempMinor[1] >= 14
                 ? true
                 : false;
             else if (exam === "reminor")
-              return minor1 === null ||
-                minor2 === null ||
-                minor1 + minor2 < minorMaxMarks * 0.7
+              return minor1 === null || minor2 === null || minor1 + minor2 < 14
                 ? true
                 : false;
           }
@@ -87,7 +84,7 @@ const ExamPage = ({ params: { id, exam } }) => {
       if (Object.keys(formData).length >= data.length) formData = {};
       setFormData(formData);
     }
-  }, [data, edit]);
+  }, [data, exam]);
 
   const handleSubmit = async () => {
     const keys = Object.keys(formData);
@@ -198,12 +195,11 @@ const ExamPage = ({ params: { id, exam } }) => {
                           onChange={({ target: { value } }) =>
                             setFormData({
                               ...formData,
-                              [student.id]: parseInt(
+                              [student.id]:
                                 (value >= 0 &&
                                   value <= name.maxMarks &&
                                   value) ||
-                                  0
-                              ),
+                                0,
                             })
                           }
                           disabled={

@@ -126,44 +126,28 @@ const ResultDisplay = ({
                           {student.parentage}
                         </td>
                       );
-                    else if (sem == -1 && typeof attribute === "object")
-                      Object.keys(attribute).map((sem) =>
-                        attribute[sem].map((subjectId) => {
-                          if (studentAttributes.includes(subjectId))
-                            return (
-                              <td key={subjectId}>{student[subjectId]}</td>
-                            );
-                          else {
-                            if (
-                              courseSubjects[sem] &&
-                              courseSubjects[sem][subjectId]
-                            ) {
-                              const varientSubjects =
-                                courseSubjects[sem][subjectId];
-                              if (varientSubjects.length === 1)
-                                return (
-                                  <td key={subjectId}>
-                                    {student[varientSubjects[0]] || "NA"}
-                                  </td>
-                                );
-                              else if (varientSubjects.length > 1) {
-                                const commonSubject = studentAttributes.find(
-                                  (studentAttribute) =>
-                                    varientSubjects.includes(studentAttribute)
-                                );
-                                return (
-                                  <td key={subjectId}>
-                                    {commonSubject
-                                      ? student[commonSubject]
-                                      : "NA"}
-                                  </td>
-                                );
-                              } else return <td key={subjectId}>NA</td>;
-                            } else return <td key={subjectId}>NA</td>;
-                          }
-                        })
-                      );
-                    else if (typeof attribute === "string")
+                    else if (
+                      courseSubjects[sem] &&
+                      courseSubjects[sem][attribute]
+                    ) {
+                      const varientSubjects = courseSubjects[sem][attribute];
+                      if (varientSubjects.length === 1)
+                        return (
+                          <td key={attribute}>
+                            {student[varientSubjects[0]] || "NA"}
+                          </td>
+                        );
+                      else if (varientSubjects.length > 1) {
+                        const commonSubject = studentAttributes.find(
+                          (subject) => varientSubjects.includes(subject)
+                        );
+                        return (
+                          <td key={attribute}>
+                            {commonSubject ? student[commonSubject] : "NA"}
+                          </td>
+                        );
+                      }
+                    } else if (typeof attribute === "string")
                       return (
                         <td key={attribute}>{student[attribute] || "NA"}</td>
                       );

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   createUserWithEmailAndPassword,
-  getAuth,
   updateEmail,
   updatePassword,
 } from "firebase/auth";
@@ -66,11 +65,12 @@ export async function POST(req) {
       );
       if (userCredential) {
         setDoc(doc(db, collectionName, userCredential.user.uid), {
-          hod,
-          permanent,
-          name,
-          phone,
-          classes,
+          hod: hod || false,
+          permanent: permanent || false,
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone,
+          classes: classes || {},
           disabled: false,
         });
       } else
@@ -120,12 +120,13 @@ export async function PUT(req) {
     }
   }
 
-  if (hod || permanent || name || phone || classes || disabled) {
-    updateDoc(doc(db, collectionName, id), {
+  if (hod || permanent || name || email || phone || classes || disabled) {
+    await updateDoc(doc(db, collectionName, id), {
       hod: hod || false,
       permanent: permanent || false,
       name: name.trim(),
-      phone: phone.trim(),
+      email: email.trim(),
+      phone: phone,
       classes: classes || {},
       disabled: disabled || false,
     });

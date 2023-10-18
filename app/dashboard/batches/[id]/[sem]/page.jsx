@@ -180,13 +180,14 @@ const SemPage = ({ params: { id, sem } }) => {
                           className="form-input"
                           style={{ width: "100%" }}
                           value={
-                            (data &&
-                              data[student.id] &&
-                              data[student.id][attribute]) ||
-                            (student.marks &&
-                              student.marks[subject] &&
-                              student.marks[subject][attribute]) ||
-                            0
+                            data &&
+                            data[student.id] &&
+                            !isNaN(data[student.id][attribute])
+                              ? data[student.id][attribute]
+                              : (student.marks &&
+                                  student.marks[subject] &&
+                                  student.marks[subject][attribute]) ||
+                                0
                           }
                           onChange={({ target: { value } }) => {
                             const maxMarks = ["internal", "external"].includes(
@@ -202,6 +203,7 @@ const SemPage = ({ params: { id, sem } }) => {
                                     ({ id }) => id === subject
                                   ).slug
                                 ] || 100;
+                            console.log(value);
                             if (value >= 0 && value <= maxMarks) {
                               setData({
                                 ...(data || {}),
@@ -210,7 +212,7 @@ const SemPage = ({ params: { id, sem } }) => {
                                     student.marks[subject]) ||
                                     {}),
                                   ...((data && data[student.id]) || {}),
-                                  [attribute]: parseInt(value),
+                                  [attribute]: value,
                                 },
                               });
                             }

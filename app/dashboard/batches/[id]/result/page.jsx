@@ -120,11 +120,6 @@ const ResultPage = ({ params: { id } }) => {
     const courses = state["courses"];
     const students = state["students"];
     const subjects = state["subjects"];
-    if (formData.sem < 0) {
-      formData.subject = "all";
-      formData.exam = "all";
-    }
-
     if (
       batches &&
       formData.sem &&
@@ -142,20 +137,7 @@ const ResultPage = ({ params: { id } }) => {
       if (courseSubjects) {
         const subjectsList = [];
 
-        if (formData.sem < 0) {
-          const semsSubjects = {};
-          Object.keys(courseSubjects).forEach((sem) => {
-            semsSubjects[sem] = [];
-            Object.keys(courseSubjects[sem]).forEach((varient) => {
-              varient === "core"
-                ? semsSubjects[sem].push(...courseSubjects[sem][varient])
-                : semsSubjects[sem].push(varient);
-              subjectsList.push(...courseSubjects[sem][varient]);
-            });
-          });
-
-          attributes.push(semsSubjects);
-        } else {
+        if (formData.sem > 0) {
           const semSubjects = [];
           if (formData.subject === "all") {
             formData.sem &&
@@ -188,10 +170,11 @@ const ResultPage = ({ params: { id } }) => {
               marks[subject] = 0;
               Object.keys(studentSubjectMarks).forEach((exam) => {
                 if (["internal", "external"].includes(exam))
-                  marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                  marks[subject] += parseFloat(studentSubjectMarks[exam]) || 0;
                 else if (["minor1", "minor2", "reminor"].includes(exam))
-                  subjectMarks.push(parseInt(studentSubjectMarks[exam]) || 0);
-                else marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                  subjectMarks.push(parseFloat(studentSubjectMarks[exam]) || 0);
+                else
+                  marks[subject] += parseFloat(studentSubjectMarks[exam]) || 0;
               });
 
               if (subjectMarks.length) {
@@ -214,10 +197,11 @@ const ResultPage = ({ params: { id } }) => {
               marks[subject] = 0;
               Object.keys(studentSubjectMarks).forEach((exam) => {
                 if (["internal", "external"].includes(exam))
-                  marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                  marks[subject] += parseFloat(studentSubjectMarks[exam]) || 0;
                 else if (["minor1", "minor2", "reminor"].includes(exam))
-                  subjectMarks.push(parseInt(studentSubjectMarks[exam]) || 0);
-                else marks[subject] += parseInt(studentSubjectMarks[exam]) || 0;
+                  subjectMarks.push(parseFloat(studentSubjectMarks[exam]) || 0);
+                else
+                  marks[subject] += parseFloat(studentSubjectMarks[exam]) || 0;
               });
 
               if (subjectMarks.length) {
@@ -233,11 +217,7 @@ const ResultPage = ({ params: { id } }) => {
             } else marks[formData.subject] = "NA";
           };
 
-          if (formData.sem < 0)
-            Object.keys(student.marks).forEach((subject) =>
-              populateSubjectsMarks(subject)
-            );
-          else {
+          if (formData.sem > 0) {
             if (formData.subject === "all" && formData.exam === "all")
               Object.keys(student.marks).forEach((subject) =>
                 populateSubjectsMarks(subject)
@@ -256,7 +236,6 @@ const ResultPage = ({ params: { id } }) => {
                   ? student.marks[formData.subject][formData.exam]
                   : "NA";
           }
-          console.log(Object.keys(marks).length);
           if (Object.keys(marks).length)
             data.push({
               rollno: student.rollno,
@@ -277,7 +256,6 @@ const ResultPage = ({ params: { id } }) => {
       if (formData.exam !== "all")
         subTitle += `Examination: ${formData.exam.toUpperCase()}; `;
 
-      console.log(data);
       setData(data);
       setTitle([`${batch.name} Result`, subTitle.trim()]);
     }

@@ -154,7 +154,7 @@ const DashboardComponent = ({
                     typeof value === "object"
                       ? value.text.trim().toLowerCase()
                       : typeof value === "string"
-                      ? value.trim().toLowerCase()
+                      ? value.trim()
                       : value;
                   if (newValue === "")
                     return setMessage({
