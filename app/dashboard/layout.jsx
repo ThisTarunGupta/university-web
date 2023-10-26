@@ -24,6 +24,10 @@ const menu = [
     id: "teachers",
     name: "Teachers",
   },
+  {
+    id: "naac",
+    name: "NAAC Feedback",
+  },
 ];
 
 const DashboardLayout = ({ children }) => {
