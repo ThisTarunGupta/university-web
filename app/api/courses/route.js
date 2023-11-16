@@ -61,7 +61,7 @@ export async function PUT(req) {
     const { name, slug, duration, maxDuration, subjects } = await req.json();
     if (name && slug && duration && !isNaN(duration)) {
       while (1) {
-        const docref = setDoc(doc(db, collectionName, id), {
+        const docRef = await setDoc(doc(db, collectionName, id), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
@@ -71,7 +71,7 @@ export async function PUT(req) {
               : duration.trim(),
           subjects: subjects || {},
         });
-        if (docref) return NextResponse.json({ error: null, data: null });
+        if (docRef) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
