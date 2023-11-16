@@ -295,51 +295,63 @@ const NAACPage = () => {
             state.naac.responses.active &&
             attributes &&
             map && (
-              <div className="table-responsive">
-                <table className="table text-center my-5">
-                  <thead className="table-dark">
-                    <tr>
-                      <td scope="col">#</td>
-                      {attributes.map((attribute) => (
-                        <td key={attribute} scope="col" aria-multiline={false}>
-                          {isNaN(attribute) ? attribute : map[attribute]}
-                        </td>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.keys(state.naac.responses).map((student, indx) => {
-                      if (student !== "active") {
-                        const slug = student.split("&&");
-                        return (
-                          <tr key={indx}>
-                            <td>{indx}</td>
-                            {attributes &&
-                              attributes.map((attribute) => {
-                                if (attribute === "ROLLNO")
-                                  return <td key={attribute}>{slug[0]}</td>;
-                                else if (attribute === "NAME")
-                                  return <td key={attribute}>{slug[1]}</td>;
-                                else if (attribute === "GENDER")
-                                  return <td key={attribute}>{slug[2]}</td>;
-                                else
-                                  return (
-                                    <td key={attribute}>
-                                      {state.naac.responses[student][attribute]}
-                                    </td>
-                                  );
-                              })}
-                          </tr>
-                        );
-                      }
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <div className="table-responsive">
+                  <table className="table text-center my-5">
+                    <thead className="table-dark">
+                      <tr>
+                        <td scope="col">#</td>
+                        {attributes.map((attribute) => (
+                          <td
+                            key={attribute}
+                            scope="col"
+                            aria-multiline={false}
+                          >
+                            {isNaN(attribute) ? attribute : map[attribute]}
+                          </td>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.keys(state.naac.responses).map(
+                        (student, indx) => {
+                          if (student !== "active") {
+                            const slug = student.split("&&");
+                            return (
+                              <tr key={indx}>
+                                <td>{indx}</td>
+                                {attributes &&
+                                  attributes.map((attribute) => {
+                                    if (attribute === "ROLLNO")
+                                      return <td key={attribute}>{slug[0]}</td>;
+                                    else if (attribute === "NAME")
+                                      return <td key={attribute}>{slug[1]}</td>;
+                                    else if (attribute === "GENDER")
+                                      return <td key={attribute}>{slug[2]}</td>;
+                                    else
+                                      return (
+                                        <td key={attribute}>
+                                          {
+                                            state.naac.responses[student][
+                                              attribute
+                                            ]
+                                          }
+                                        </td>
+                                      );
+                                  })}
+                              </tr>
+                            );
+                          }
+                        }
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <button className="mt-3 btn btn-success" onClick={generate}>
+                  Generate
+                </button>
+              </>
             )}
-          <button className="mt-3 btn btn-success" onClick={generate}>
-            Generate
-          </button>
         </>
       )}
     </>
