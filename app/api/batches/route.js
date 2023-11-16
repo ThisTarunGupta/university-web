@@ -39,15 +39,15 @@ export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     const { name, slug, course, completed } = await req.json();
     if (name && slug && course) {
-      const docRef = await addDoc(collection(db, collectionName), {
-        name: name.trim(),
-        slug: slug.trim(),
-        course: course.trim(),
-        completed: completed || false,
-      });
-      return docRef
-        ? NextResponse.json({ error: null, data: docRef.id })
-        : NextResponse.json({ error: "Error in adding batch", data: null });
+      while (1) {
+        const docRef = await addDoc(collection(db, collectionName), {
+          name: name.trim(),
+          slug: slug.trim(),
+          course: course.trim(),
+          completed: completed || false,
+        });
+        if (docRef) return NextResponse.json({ error: null, data: docRef.id });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }
@@ -56,14 +56,15 @@ export async function PUT(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     const { id, name, slug, course, completed } = await req.json();
     if (id && name && slug && course) {
-      setDoc(doc(db, collectionName, id), {
-        name: name.trim(),
-        slug: slug.trim(),
-        course: course.trim(),
-        completed: completed || false,
-      });
-
-      return NextResponse.json({ error: null, data: null });
+      while (1) {
+        const docRef = await setDoc(doc(db, collectionName, id), {
+          name: name.trim(),
+          slug: slug.trim(),
+          course: course.trim(),
+          completed: completed || false,
+        });
+        if (docRef) return NextResponse.json({ error: null, data: null });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }
@@ -77,10 +78,17 @@ export async function DELETE(req) {
         query(collection(db, "students"), where("batch", "==", id))
       );
       if (!querySnapshot.empty)
-        querySnapshot.forEach(({ id }) => deleteDoc(doc(db, "students", id)));
+        querySnapshot.forEach(async ({ id }) => {
+          while (1) {
+            const docRef = await deleteDoc(doc(db, "students", id));
+            if (docRef) break;
+          }
+        });
 
-      await deleteDoc(doc(db, collectionName, id));
-      return NextResponse.json({ error: null, data: null });
+      while (1) {
+        const docRef = await deleteDoc(doc(db, collectionName, id));
+        if (docRef) return NextResponse.json({ error: null, data: null });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }

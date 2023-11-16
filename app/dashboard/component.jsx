@@ -287,6 +287,8 @@ const DashboardComponent = ({
               } else if (
                 (key !== "id" &&
                   key !== "password" &&
+                  key !== "reappear" &&
+                  key !== "reappearIn" &&
                   key !== "email" &&
                   key !== "batch" &&
                   key !== "marks" &&
@@ -307,6 +309,13 @@ const DashboardComponent = ({
                       value={formData[key]}
                       minLength={key === "phone" ? 10 : undefined}
                       maxLength={key === "phone" ? 10 : undefined}
+                      pattern={
+                        key === "phone"
+                          ? "^[0-9]{10}$"
+                          : key === "duration" || key === "maxDuration"
+                          ? "^[0-9.]+$"
+                          : undefined
+                      }
                       onChange={({ target: { value } }) =>
                         setFormData({
                           [key]:

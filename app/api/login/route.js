@@ -1,18 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateEmail,
-  updatePassword,
-} from "firebase/auth";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore/lite";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore/lite";
 
 import { auth, db } from "@/app/firebaseConfig";
 
@@ -28,18 +16,16 @@ export async function POST(req) {
         password.trim()
       );
       if (userCredential) {
-        const docRef = await getDoc(
-          doc(db, collectionName, userCredential.user.uid)
-        );
-        return docRef
-          ? NextResponse.json({
+        while (1) {
+          const docRef = await getDoc(
+            doc(db, collectionName, userCredential.user.uid)
+          );
+          if (docRef)
+            return NextResponse.json({
               error: null,
               data: { id: userCredential.user.uid, ...docRef.data() },
-            })
-          : NextResponse.json({
-              error: "Credentils doesn't match",
-              data: null,
             });
+        }
       } else
         return NextResponse.json({
           error: "Credentils doesn't match",

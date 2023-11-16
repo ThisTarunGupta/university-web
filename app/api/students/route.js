@@ -141,24 +141,22 @@ export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     const { batch, rollno, name, parentage, email, phone } = await req.json();
     if (batch && rollno && name && parentage && email && phone) {
-      const docRef = await addDoc(collection(db, collectionName), {
-        batch: batch.trim(),
-        rollno: rollno.trim(),
-        name: name.trim(),
-        parentage: parentage.trim(),
-        email: email.trim(),
-        phone: phone,
-        marks: {},
-      });
-      return docRef
-        ? NextResponse.json({
+      while (1) {
+        const docRef = await addDoc(collection(db, collectionName), {
+          batch: batch.trim(),
+          rollno: rollno.trim(),
+          name: name.trim(),
+          parentage: parentage.trim(),
+          email: email.trim(),
+          phone: phone,
+          marks: {},
+        });
+        if (docRef)
+          return NextResponse.json({
             error: null,
             data: docRef.id,
-          })
-        : NextResponse.json({
-            error: "Error in adding student",
-            data: null,
           });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }
@@ -169,29 +167,37 @@ export async function PUT(req) {
     if (ref === "details") {
       const { id, rollno, name, parentage, email, phone } = data;
       if (id && rollno && name && parentage && email && phone) {
-        await updateDoc(doc(db, collectionName, id), {
-          rollno: rollno ? rollno.trim() : null,
-          name: name ? name.trim() : null,
-          parentage: parentage ? parentage.trim() : null,
-          email: email ? email.trim() : null,
-          phone: phone,
-        });
-        return NextResponse.json({ error: null, data: null });
+        while (1) {
+          const docRef = await updateDoc(doc(db, collectionName, id), {
+            rollno: rollno ? rollno.trim() : null,
+            name: name ? name.trim() : null,
+            parentage: parentage ? parentage.trim() : null,
+            email: email ? email.trim() : null,
+            phone: phone,
+          });
+          if (docRef) return NextResponse.json({ error: null, data: null });
+        }
       } else return NextResponse.json({ error: "Invalid data", data: null });
     } else if (merge === 1)
-      Object.keys(data).forEach((id) => {
+      Object.keys(data).forEach(async (id) => {
         if (data[id])
-          updateDoc(doc(db, collectionName, id), {
-            [`marks.${ref}`]: data[id],
-          });
+          while (1) {
+            const docRef = await updateDoc(doc(db, collectionName, id), {
+              [`marks.${ref}`]: data[id],
+            });
+            if (docRef) break;
+          }
       });
     else return NextResponse.json({ error: "Not authorized", data: null });
   } else if (exam !== "")
-    Object.keys(data).forEach((id) => {
+    Object.keys(data).forEach(async (id) => {
       if (!isNaN(data[id]))
-        updateDoc(doc(db, collectionName, id), {
-          [`marks.${ref}.${exam}`]: parseFloat(data[id]),
-        });
+        while (1) {
+          const docRef = await updateDoc(doc(db, collectionName, id), {
+            [`marks.${ref}.${exam}`]: parseFloat(data[id]),
+          });
+          if (docRef) break;
+        }
     });
   else
     return NextResponse.json({
@@ -205,7 +211,11 @@ export async function PUT(req) {
 export async function DELETE(req) {
   const searchParams = new URL(req.url).searchParams;
   if (await isAdmin(searchParams.get("uid"))) {
-    await deleteDoc(doc(db, collectionName, searchParams.get("id")));
-    return NextResponse.json({ error: null, data: null });
+    while (1) {
+      const docRef = await deleteDoc(
+        doc(db, collectionName, searchParams.get("id"))
+      );
+      if (docRef) return NextResponse.json({ error: null, data: null });
+    }
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }

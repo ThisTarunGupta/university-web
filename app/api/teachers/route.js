@@ -58,25 +58,34 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid data", data: null });
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        phone
-      );
-      if (userCredential) {
-        setDoc(doc(db, collectionName, userCredential.user.uid), {
-          hod: hod || false,
-          permanent: permanent || false,
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone,
-          classes: classes || {},
-          disabled: false,
-        });
-      } else
-        return NextResponse.json({ error: "Error in adding user", data: null });
-
-      return NextResponse.json({ error: null, data: userCredential.user.uid });
+      while (1) {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          phone
+        );
+        if (userCredential) {
+          while (1) {
+            const docRef = await setDoc(
+              doc(db, collectionName, userCredential.user.uid),
+              {
+                hod: hod || false,
+                permanent: permanent || false,
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone,
+                classes: classes || {},
+                disabled: false,
+              }
+            );
+            if (docRef) break;
+          }
+          return NextResponse.json({
+            error: null,
+            data: userCredential.user.uid,
+          });
+        }
+      }
     } catch (e) {
       return NextResponse.json({ error: e.code.substring(5), data: null });
     }
@@ -102,36 +111,33 @@ export async function PUT(req) {
 
   if (!admin) {
     if (email) {
-      const { error } = await updateEmail(auth.currentUser, email);
-      if (error)
-        return NextResponse.json({
-          error: "Error in updating user's email",
-          data: null,
-        });
+      while (1) {
+        const docRef = await updateEmail(auth.currentUser, email);
+        if (docRef) break;
+      }
     }
 
     if (password) {
-      const { error } = await updatePassword(auth.currentUser, password);
-      if (error)
-        return NextResponse.json({
-          error: "Error in updating user's password",
-          data: null,
-        });
+      while (1) {
+        const docRef = await updatePassword(auth.currentUser, password);
+        if (docRef) break;
+      }
     }
   }
 
   if (hod || permanent || name || email || phone || classes || disabled) {
-    await updateDoc(doc(db, collectionName, id), {
-      hod: hod || false,
-      permanent: permanent || false,
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone,
-      classes: classes || {},
-      disabled: disabled || false,
-    });
-
-    return NextResponse.json({ error: null, data: null });
+    while (1) {
+      const docRef = await updateDoc(doc(db, collectionName, id), {
+        hod: hod || false,
+        permanent: permanent || false,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone,
+        classes: classes || {},
+        disabled: disabled || false,
+      });
+      if (docRef) return NextResponse.json({ error: null, data: null });
+    }
   }
 
   return NextResponse.json({ error: "Error in updating teacher", data: null });
@@ -142,12 +148,14 @@ export async function DELETE(req) {
   if (await isAdmin(searchParams.get("uid"))) {
     const id = searchParams.get("id");
     if (id) {
-      await updateDoc(
-        doc(db, collectionName, searchParams.get("id")),
-        { disabled: true },
-        { merge: true }
-      );
-      return NextResponse.json({ error: null, data: null });
+      while (1) {
+        const docRef = await updateDoc(
+          doc(db, collectionName, searchParams.get("id")),
+          { disabled: true },
+          { merge: true }
+        );
+        if (docRef) return NextResponse.json({ error: null, data: null });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   }
   return NextResponse.json({ error: "Not authorized", data: null });

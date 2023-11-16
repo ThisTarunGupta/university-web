@@ -37,13 +37,17 @@ export async function GET(req) {
 
 export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    const { name, slug, duration, subjects } = await req.json();
-    if (name && slug && duration) {
+    const { name, slug, duration, maxDuration, subjects } = await req.json();
+    if (name && slug && duration && !isNaN(duration)) {
       while (1) {
         const docRef = await addDoc(collection(db, collectionName), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
+          maxDuration:
+            maxDuration && !isNaN(maxDuration)
+              ? maxDuration.trim()
+              : duration.trim(),
           subjects: subjects || {},
         });
         if (docRef) return NextResponse.json({ error: null, data: docRef.id });
@@ -54,13 +58,17 @@ export async function POST(req) {
 
 export async function PUT(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    const { id, name, slug, duration, subjects } = await req.json();
-    if (id && name && slug && duration) {
+    const { name, slug, duration, maxDuration, subjects } = await req.json();
+    if (name && slug && duration && !isNaN(duration)) {
       while (1) {
         const docref = setDoc(doc(db, collectionName, id), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
+          maxDuration:
+            maxDuration && !isNaN(maxDuration)
+              ? maxDuration.trim()
+              : duration.trim(),
           subjects: subjects || {},
         });
         if (docref) return NextResponse.json({ error: null, data: null });
