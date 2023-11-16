@@ -39,15 +39,15 @@ export async function POST(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     const { name, slug, duration, subjects } = await req.json();
     if (name && slug && duration) {
-      const docRef = await addDoc(collection(db, collectionName), {
-        name: name.trim(),
-        slug: slug.trim(),
-        duration: duration.trim(),
-        subjects: subjects || {},
-      });
-      return docRef
-        ? NextResponse.json({ error: null, data: docRef.id })
-        : NextResponse.json({ error: "Error in adding course", data: null });
+      while (1) {
+        const docRef = await addDoc(collection(db, collectionName), {
+          name: name.trim(),
+          slug: slug.trim(),
+          duration: duration.trim(),
+          subjects: subjects || {},
+        });
+        if (docRef) return NextResponse.json({ error: null, data: docRef.id });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }
@@ -56,14 +56,15 @@ export async function PUT(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
     const { id, name, slug, duration, subjects } = await req.json();
     if (id && name && slug && duration) {
-      setDoc(doc(db, collectionName, id), {
-        name: name.trim(),
-        slug: slug.trim(),
-        duration: duration.trim(),
-        subjects: subjects || {},
-      });
-
-      return NextResponse.json({ error: null, data: null });
+      while (1) {
+        const docref = setDoc(doc(db, collectionName, id), {
+          name: name.trim(),
+          slug: slug.trim(),
+          duration: duration.trim(),
+          subjects: subjects || {},
+        });
+        if (docref) return NextResponse.json({ error: null, data: null });
+      }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }
@@ -77,8 +78,10 @@ export async function DELETE(req) {
         query(collection(db, "batches"), where("course", "==", id))
       );
       if (querySnapshot.empty) {
-        await deleteDoc(doc(db, collectionName, id));
-        return NextResponse.json({ error: null, data: null });
+        while (1) {
+          const docRef = await deleteDoc(doc(db, collectionName, id));
+          if (docRef) return NextResponse.json({ error: null, data: null });
+        }
       }
 
       return NextResponse.json({

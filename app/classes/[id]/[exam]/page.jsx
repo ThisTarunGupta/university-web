@@ -39,9 +39,9 @@ const ExamPage = ({ params: { id, exam } }) => {
         const newData = students.filter((student) => {
           const marks = student["marks"] && student["marks"][slug[1]];
           if (marks) {
-            const minor1 = parseFloat(marks["minor1"]) || null;
-            const minor2 = parseFloat(marks["minor2"]) || null;
-            const reminor = parseFloat(marks["reminor"]) || null;
+            const minor1 = parseFloat(marks["minor1"]) || 0;
+            const minor2 = parseFloat(marks["minor2"]) || 0;
+            const reminor = parseFloat(marks["reminor"]) || 0;
 
             const tempMinor = [minor1, minor2, reminor];
             tempMinor.sort((a, b) => {

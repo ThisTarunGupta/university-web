@@ -66,6 +66,13 @@ const RootLayout = ({ children }) => {
           referrerPolicy="no-referrer"
           async
         ></script>
+        <script
+          src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.1/jspdf.plugin.autotable.min.js"
+          integrity="sha512-jLgOBQkUaRRXfpwIEGE5jlCPSxMiQSFm0/cdzP/KuiECIx5x0ucr5enJrjtQJt+Y8vpIpOroYhsfsRLoDWO26Q=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+          async
+        ></script>
       </body>
     </html>
   );
