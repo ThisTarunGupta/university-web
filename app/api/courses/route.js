@@ -40,7 +40,7 @@ export async function POST(req) {
     const { name, slug, duration, maxDuration, subjects } = await req.json();
     if (name && slug && duration && !isNaN(duration)) {
       while (1) {
-        const docRef = await addDoc(collection(db, collectionName), {
+        const error = await addDoc(collection(db, collectionName), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
@@ -50,7 +50,7 @@ export async function POST(req) {
               : duration.trim(),
           subjects: subjects || {},
         });
-        if (docRef) return NextResponse.json({ error: null, data: docRef.id });
+        if (!error) return NextResponse.json({ error: null, data: error.id });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
@@ -62,7 +62,7 @@ export async function PUT(req) {
       await req.json();
     if (name && slug && duration && !isNaN(duration)) {
       while (1) {
-        const docRef = await setDoc(doc(db, collectionName, id), {
+        const error = await setDoc(doc(db, collectionName, id), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
@@ -72,7 +72,7 @@ export async function PUT(req) {
               : duration.trim(),
           subjects: subjects || {},
         });
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
@@ -88,8 +88,8 @@ export async function DELETE(req) {
       );
       if (querySnapshot.empty) {
         while (1) {
-          const docRef = await deleteDoc(doc(db, collectionName, id));
-          if (docRef) return NextResponse.json({ error: null, data: null });
+          const error = await deleteDoc(doc(db, collectionName, id));
+          if (!error) return NextResponse.json({ error: null, data: null });
         }
       }
 

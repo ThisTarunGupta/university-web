@@ -92,10 +92,10 @@ export async function PUT(req) {
   } else {
     if (key && typeof response === "object") {
       while (1) {
-        const docRef = await updateDoc(doc(db, collectionName, "responses"), {
+        const error = await updateDoc(doc(db, collectionName, "responses"), {
           [`${key.trim()}`]: response,
         });
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   }
