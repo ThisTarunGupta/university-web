@@ -58,7 +58,8 @@ export async function POST(req) {
 
 export async function PUT(req) {
   if (await isAdmin(new URL(req.url).searchParams.get("uid"))) {
-    const { name, slug, duration, maxDuration, subjects } = await req.json();
+    const { id, name, slug, duration, maxDuration, subjects } =
+      await req.json();
     if (name && slug && duration && !isNaN(duration)) {
       while (1) {
         const docRef = await setDoc(doc(db, collectionName, id), {

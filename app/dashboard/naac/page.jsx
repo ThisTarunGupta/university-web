@@ -34,7 +34,6 @@ const NAACPage = () => {
   }, []);
 
   const getColumnName = (colIndex) => {
-    // Convert numeric column index to Excel-like column name
     let dividend = colIndex;
     let columnName = "";
 
@@ -66,8 +65,8 @@ const NAACPage = () => {
     });
 
     const { error } = await res.json();
-    if (isActive) generate();
-    setState({
+    if (isActive) await generate();
+    await setState({
       naac: {
         responses: { active: !isActive },
       },

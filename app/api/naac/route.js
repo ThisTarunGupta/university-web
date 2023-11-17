@@ -83,12 +83,12 @@ export async function PUT(req) {
   if (uid && (await isAdmin(uid))) {
     if (typeof active === "boolean") {
       while (1) {
-        const docRef = await setDoc(doc(db, collectionName, "responses"), {
+        const error = await setDoc(doc(db, collectionName, "responses"), {
           active,
         });
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
-    }
+    } else return NextResponse.json({ error: "Invalid data", data: null });
   } else {
     if (key && typeof response === "object") {
       while (1) {
