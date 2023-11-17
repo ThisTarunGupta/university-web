@@ -168,24 +168,24 @@ export async function PUT(req) {
       const { id, rollno, name, parentage, email, phone } = data;
       if (id && rollno && name && parentage && email && phone) {
         while (1) {
-          const docRef = await updateDoc(doc(db, collectionName, id), {
+          const error = await updateDoc(doc(db, collectionName, id), {
             rollno: rollno ? rollno.trim() : null,
             name: name ? name.trim() : null,
             parentage: parentage ? parentage.trim() : null,
             email: email ? email.trim() : null,
             phone: phone,
           });
-          if (docRef) return NextResponse.json({ error: null, data: null });
+          if (!error) return NextResponse.json({ error: null, data: null });
         }
       } else return NextResponse.json({ error: "Invalid data", data: null });
     } else if (merge === 1)
       Object.keys(data).forEach(async (id) => {
         if (data[id])
           while (1) {
-            const docRef = await updateDoc(doc(db, collectionName, id), {
+            const error = await updateDoc(doc(db, collectionName, id), {
               [`marks.${ref}`]: data[id],
             });
-            if (docRef) break;
+            if (!error) break;
           }
       });
     else return NextResponse.json({ error: "Not authorized", data: null });
@@ -193,10 +193,10 @@ export async function PUT(req) {
     Object.keys(data).forEach(async (id) => {
       if (!isNaN(data[id]))
         while (1) {
-          const docRef = await updateDoc(doc(db, collectionName, id), {
+          const error = await updateDoc(doc(db, collectionName, id), {
             [`marks.${ref}.${exam}`]: parseFloat(data[id]),
           });
-          if (docRef) break;
+          if (!error) break;
         }
     });
   else
@@ -212,10 +212,10 @@ export async function DELETE(req) {
   const searchParams = new URL(req.url).searchParams;
   if (await isAdmin(searchParams.get("uid"))) {
     while (1) {
-      const docRef = await deleteDoc(
+      const error = await deleteDoc(
         doc(db, collectionName, searchParams.get("id"))
       );
-      if (docRef) return NextResponse.json({ error: null, data: null });
+      if (!error) return NextResponse.json({ error: null, data: null });
     }
   } else return NextResponse.json({ error: "Not authorized", data: null });
 }

@@ -56,13 +56,13 @@ export async function PUT(req) {
     const { id, name, subjectId, slug, credits } = await req.json();
     if (id && name && subjectId && slug && credits) {
       while (1) {
-        const docRef = await setDoc(doc(db, collectionName, id), {
+        const error = await setDoc(doc(db, collectionName, id), {
           name: name.trim(),
           subjectId: subjectId.trim(),
           slug: slug.trim(),
           credits,
         });
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });
@@ -74,8 +74,8 @@ export async function DELETE(req) {
     const id = searchParams.get("id");
     if (id) {
       while (1) {
-        const docRef = await deleteDoc(doc(db, collectionName, id));
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        const error = await deleteDoc(doc(db, collectionName, id));
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });

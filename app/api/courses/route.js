@@ -40,7 +40,7 @@ export async function POST(req) {
     const { name, slug, duration, maxDuration, subjects } = await req.json();
     if (name && slug && duration && !isNaN(duration)) {
       while (1) {
-        const error = await addDoc(collection(db, collectionName), {
+        const docRef = await addDoc(collection(db, collectionName), {
           name: name.trim(),
           slug: slug.trim(),
           duration: duration.trim(),
@@ -50,7 +50,7 @@ export async function POST(req) {
               : duration.trim(),
           subjects: subjects || {},
         });
-        if (!error) return NextResponse.json({ error: null, data: error.id });
+        if (docRef) return NextResponse.json({ error: null, data: docRef.id });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   } else return NextResponse.json({ error: "Not authorized", data: null });

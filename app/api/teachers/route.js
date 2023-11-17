@@ -112,22 +112,22 @@ export async function PUT(req) {
   if (!admin) {
     if (email) {
       while (1) {
-        const docRef = await updateEmail(auth.currentUser, email);
-        if (docRef) break;
+        const error = await updateEmail(auth.currentUser, email);
+        if (!error) break;
       }
     }
 
     if (password) {
       while (1) {
-        const docRef = await updatePassword(auth.currentUser, password);
-        if (docRef) break;
+        const error = await updatePassword(auth.currentUser, password);
+        if (!error) break;
       }
     }
   }
 
   if (hod || permanent || name || email || phone || classes || disabled) {
     while (1) {
-      const docRef = await updateDoc(doc(db, collectionName, id), {
+      const error = await updateDoc(doc(db, collectionName, id), {
         hod: hod || false,
         permanent: permanent || false,
         name: name.trim(),
@@ -136,7 +136,7 @@ export async function PUT(req) {
         classes: classes || {},
         disabled: disabled || false,
       });
-      if (docRef) return NextResponse.json({ error: null, data: null });
+      if (!error) return NextResponse.json({ error: null, data: null });
     }
   }
 
@@ -149,12 +149,12 @@ export async function DELETE(req) {
     const id = searchParams.get("id");
     if (id) {
       while (1) {
-        const docRef = await updateDoc(
+        const error = await updateDoc(
           doc(db, collectionName, searchParams.get("id")),
           { disabled: true },
           { merge: true }
         );
-        if (docRef) return NextResponse.json({ error: null, data: null });
+        if (!error) return NextResponse.json({ error: null, data: null });
       }
     } else return NextResponse.json({ error: "Invalid data", data: null });
   }
