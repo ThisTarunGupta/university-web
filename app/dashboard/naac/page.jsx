@@ -76,8 +76,8 @@ const NAACPage = () => {
   const generate = async () => {
     if (state.naac.responses.active) {
       const responses = state.naac.responses;
-      const responsesLength = Object.keys(responses).length;
       delete responses.active;
+      const responsesLength = Object.keys(responses).length;
       if (responsesLength) {
         const columnSums = {};
         const workbook = new ExcelJS.Workbook();
