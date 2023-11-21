@@ -369,16 +369,6 @@ const ResultPage = ({ params: { id } }) => {
           >
             Generate
           </button>
-          {data && (
-            <>
-              <button
-                className="btn btn-outline-warning ms-3"
-                onClick={handleDownload}
-              >
-                Download
-              </button>
-            </>
-          )}
         </div>
         {attributes && data && subjectsList && title && (
           <ResultDisplay

@@ -32,11 +32,6 @@ const Header = () => {
             {user && (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link active" href="/profile">
-                    Profile
-                  </Link>
-                </li>
-                <li className="nav-item">
                   <Link
                     className="nav-link active"
                     href="/"

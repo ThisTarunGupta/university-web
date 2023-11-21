@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 
 import Switch from "@/app/components/switch";
